@@ -1,0 +1,18 @@
+{
+  "name": "pricklywiggles",
+  "owner": {
+    "name": "Gustavo Gallegos",
+    "email": "sky100010@gmail.com"
+  },
+  "metadata": {
+    "description": "Gustavo's Claude Code plugins",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "ship-it",
+      "source": "./",
+      "description": "Ship your work end to end: drive a batch of issues or your current local changes through implement, review, comment cleanup, and PR; keep living docs in sync; and cut releases. A configurable orchestrator plus standalone, individually callable skills. Run init to adapt it to your project."
+    }
+  ]
+}
