@@ -149,5 +149,5 @@ Detect-first, ask-second. Detects package manager, verify command, CI system, tr
 
 ## Status
 
-- **Built**: `comment-cleanup` skill (in plugin). In Sanum's in-repo `ship-issues` skill, ready to port: the worktree lifecycle scripts, the post-merge archive helper, and the CI/merge watchers.
-- **To build, in order**: config seam (read `ship-it.config`) -> port + generalize the stage skills (`fix-one-issue`, `review-and-address`, `ci-fix`) and sources -> the doc-job registry + reviewers fan-out -> `init` -> generalize `cut-release` -> validate on a second, non-Sanum repo.
+- **Built (in plugin)**: stage skills `comment-cleanup`, `ci-fix`, `review-and-address`, `fix-one-issue`; the `ship-issues` orchestrator (lanes + the Workflow template chaining the stage skills); bundled `scripts/ci-watch.sh`.
+- **To build, in order**: the **sources / work-unit resolver** (tracker + working-tree/branch/pr/describe); a shared **config-loader** (so skills stop reading `ship-it.config` ad hoc); the **worktree + post-PR lifecycle scripts** (extract the inline `git worktree` / setup / cleanup / merge-watch logic, and turn the OpenSpec-archive and graphify steps into doc jobs); the **doc-job runners** for the three mechanics; **`init`** (detect + interview + generate config and novel doc jobs); generalize **`cut-release`**; then validate on a second, non-Sanum repo.
