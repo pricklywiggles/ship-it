@@ -38,8 +38,9 @@
   "worktree": {
     "enabled": true,
     "root": ".claude/worktrees",
-    // make a worktree runnable (real offline install + Tauri sidecar resources)
-    "prepare": "${CLAUDE_PLUGIN_ROOT}/scripts/prepare-worktree-deps.sh {wt} {main}"
+    // project-supplied (lives in the repo, not the plugin, since Sanum's prep is project-specific):
+    // real offline install + links the Tauri sidecar resources. {wt} and {main} are substituted.
+    "prepare": ".claude/ship-it/prepare-worktree.sh {wt} {main}"
   },
 
   "concurrency": { "maxLanes": 8 },
