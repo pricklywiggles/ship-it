@@ -72,7 +72,17 @@ Check and report (warn, do not fail):
 
 ## 4. Generate doc-job skills for novel docs
 
-For each doc the user named that has no built-in job, invoke **skill-creator** (Skill tool) to write a **project-local** skill as a directory at `.claude/skills/<name>/SKILL.md` (not a flat `.claude/skills/<name>.md`, which will not load as a skill), not in the plugin, that updates that doc by the chosen mechanic given the shipped changes. Ensure the generated skill declares `allowed-tools` (at least Bash, Read, Edit) so it can compute the diff and edit its doc. Register it in the config's `docs.jobs` by its bare name (`<name>`). Built-in docs (openspec, graphify, impeccable) need no generation; reference them directly.
+For each doc the user named that has no built-in job, create a **project-local** skill: a directory at `.claude/skills/<name>/SKILL.md` (never a flat `.claude/skills/<name>.md`, which does not load as a skill), in the repo, not in the plugin. It updates that doc by its chosen mechanic from the shipped changes.
+
+**Write this `SKILL.md` yourself, now, in this step**, then continue. It is a static file; nothing runs asynchronously and there is nothing to wait for. If you call the **skill-creator** skill for a richer scaffold, understand the Skill tool only *loads its authoring steps into your own context*, it does not spawn a background worker: follow those steps yourself and `Write` the file in this same turn. Never pause waiting for skill-creator (or any invoked skill) to "finish" on its own.
+
+The file must:
+- declare `allowed-tools` (at least `Bash, Read, Edit`) so it can diff the change and edit its doc,
+- carry a description that triggers both from the ship-it doc phase and from a manual "update `<doc>` for this change",
+- classify whether a given diff is in scope for the doc, then act by mechanic (curate-serial: edit only the affected sections; regenerate: run the command; author-reconcile: author the per-unit artifact),
+- include a brief project-context section so the skill is grounded in this repo.
+
+Register it in `docs.jobs` by its bare name (`<name>`). Built-in docs (openspec, graphify, impeccable) need no generation; reference them directly.
 
 ## 5. Write ship-it.config
 
