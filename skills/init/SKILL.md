@@ -10,6 +10,14 @@ Produce a `ship-it.config` that adapts the generic engine to this project. Detec
 
 The full config schema is in the plugin's `CONTRACTS.md`; the keys are summarized in step 5.
 
+## 0. Explain the plan first
+
+Before touching anything, tell the user what init will do and in what order, so they know what is coming and that it is safe. Something like:
+
+> I'll set up ship-it for this project in five steps: (1) **detect** your setup (package manager, verify command, CI, issue tracker, doc tools, installed reviewers) by reading the repo, this is read-only; (2) **ask** you only what I cannot infer, with the reason for each question; (3) **check prerequisites** (tracker access, `gh` auth, doc-tool binaries); (4) **generate** a small doc-job skill for any doc you keep that has no built-in; (5) **write** `ship-it.config.json`. The only things I create are that config and any generated doc-job skills; nothing else is changed.
+
+Keep it to a short preview, then proceed to detection.
+
 ## 1. Detect (read-only)
 
 Read the repo and record what you find:
@@ -24,7 +32,7 @@ Read the repo and record what you find:
 
 ## 2. Interview (only the gaps)
 
-Present what you detected, then batch the open questions into `AskUserQuestion` (a few at a time):
+First show the user a short summary of everything you detected (the values you will use), so they see how much is already inferred and only the gaps remain. Then ask the gaps, batched into `AskUserQuestion` (a few at a time). **Never ask a bare question.** Each question carries its context: one line on what the setting controls, why ship-it needs it, and what each option means or trades off. Write the option descriptions concretely, for example, for merge strategy spell out that squash vs merge changes how stacked PRs and the post-merge archive behave; for reviewers, say what each one checks; for doc jobs, what "keep current" means for that doc. The gaps to cover:
 - **tracker**: confirm the type; for Linear, the project + team + id prefix; for github-issues, the "todo" label.
 - **merge strategy**: squash / merge / rebase. It cannot be fully detected and it changes stacked-PR and archive behavior, so propose a default from the repo's allowed methods (`gh api repos/{owner}/{repo} -q '{squash: .allow_squash_merge, merge: .allow_merge_commit, rebase: .allow_rebase_merge}'`), then confirm with the user.
 - **reviewers**: which to run on each diff (multi-select from detected + known). Default to `pr-review-toolkit`; if it is not installed, offer the install command or let them point at another. More than one is fine.
@@ -34,7 +42,7 @@ Present what you detected, then batch the open questions into `AskUserQuestion` 
 - **concurrency**: max parallel lanes.
 - **releases (optional)**: whether to set up release management at all; if yes, capture the version source, tag format, notes style, and build to watch, and set `release.enabled` true; if no, omit the `release` block.
 
-Keep it short: confirm detections in bulk, ask only what is genuinely unknown.
+Confirm the detected values in bulk rather than re-asking them, and ask only what is genuinely unknown, but always with the context above so the user understands each choice rather than guessing.
 
 ## 3. Prerequisite and auth check
 
