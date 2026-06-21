@@ -43,7 +43,7 @@ Each result carries `docNeed` (the doc jobs it triggers) for Phase 6.
 
 ## Phase 6: Documentation (doc-job fan-out)
 
-After the Workflow returns, run the doc phase: for each job in `config.docs.jobs`, run the ones whose trigger (`appliesWhen`) matched a shipped work-unit, in parallel (each owns a different file). By mechanic:
+Read `references/doc-jobs.md` for the mechanics and built-in jobs. After the Workflow returns, run the doc phase: for each job in `config.docs.jobs`, run the ones whose trigger (`appliesWhen`) matched a shipped work-unit, in parallel (each owns a different file). By mechanic:
 - **regenerate**: run the job's command (e.g. `graphify update .`).
 - **author-reconcile**: the per-work-unit artifact was authored on its branch during the run (or author it now); reconcile into canonical docs post-merge (Phase 7).
 - **curate-serial**: update the shared prose doc once, serially (e.g. `impeccable` for DESIGN.md). If several work-units are visual, one consolidated pass.
@@ -52,7 +52,7 @@ Skip jobs with no matching change. Do not over-document.
 
 ## Phase 7: Post-PR watchers (in-session, optional)
 
-If `config.ci.watch`, spawn one **`ship-it:ci-fix`** background watcher per PR. If there are author-reconcile doc jobs, launch the merge watcher: poll until the PRs are merged (timeout), then run each job's post-merge reconcile (archive) for the merged work-units and open the batched docs PR. On timeout, fall back to the manual command. (The watcher scripts are bundled later; until then launch them inline.)
+If `config.ci.watch`, spawn one **`ship-it:ci-fix`** background watcher per PR. If there are author-reconcile doc jobs, launch the merge watcher `${CLAUDE_PLUGIN_ROOT}/scripts/watch-merges.sh --prs <csv> --reconcile "<cmd>"`: it polls until the PRs are merged (timeout), then runs the reconcile (e.g. `${CLAUDE_PLUGIN_ROOT}/scripts/openspec-archive.sh <change-ids>`) and opens the batched docs PR. On timeout, it prints the manual reconcile command. See `references/doc-jobs.md`.
 
 ## Phase 8: Summarize
 
@@ -71,3 +71,6 @@ Print a table: work-unit, PR link, lane, what changed, review items applied/skip
 
 - `references/sources.md` - how Phase 1 resolves the trigger into work-units: source dispatch, the built-in tracker adapters, and the custom-tracker extension point. Read before Phase 1.
 - `references/workflow.md` - the lane-grouping algorithm and the Workflow script template to adapt. Read before Phase 5.
+- `references/doc-jobs.md` - the three doc-job mechanics, the built-in jobs, and the post-merge reconcile flow. Read before Phase 6.
+- `${CLAUDE_PLUGIN_ROOT}/scripts/openspec-archive.sh` - the openspec author-reconcile reconcile (merged-gated `openspec archive`, batched docs PR).
+- `${CLAUDE_PLUGIN_ROOT}/scripts/watch-merges.sh` - the in-session merge watcher that runs a `--reconcile` command once the PRs merge.
