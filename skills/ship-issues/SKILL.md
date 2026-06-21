@@ -6,7 +6,7 @@ allowed-tools: Bash, Read, Write, Edit, AskUserQuestion, Agent, Workflow, Skill,
 
 # ship-issues: batch orchestrator
 
-Drive a set of work-units to open PRs concurrently, chaining the ship-it stage skills per work-unit, then keep the project's living docs current. Generic: every project specific lives in `ship-it.config`; the flow does not. Read `references/workflow.md` before Phase 5 (the lane algorithm and the Workflow template to adapt).
+Drive a set of work-units to open PRs concurrently, chaining the ship-it stage skills per work-unit, then keep the project's living docs current. Generic: every project specific lives in `ship-it.config`; the flow does not. Load the resolved config once up front with `${CLAUDE_PLUGIN_ROOT}/scripts/load-config.sh` (defaults applied, `@FILE` refs like `houseRules: @AGENTS.md` inlined) and read keys with `jq`. Read `references/workflow.md` before Phase 5 (the lane algorithm and the Workflow template to adapt).
 
 ## Phase 1: Resolve the work-units
 
@@ -76,3 +76,4 @@ Print a table: work-unit, PR link, lane, what changed, review items applied/skip
 - `${CLAUDE_PLUGIN_ROOT}/scripts/watch-merges.sh` - the in-session merge watcher that runs a `--reconcile` command once the PRs merge.
 - `${CLAUDE_PLUGIN_ROOT}/scripts/setup-worktrees.sh` - pre-create lane-head worktrees (stdin `<id>|<branch>|<base>`), running the project prepare per worktree. Read before Phase 4.
 - `${CLAUDE_PLUGIN_ROOT}/scripts/cleanup-worktrees.sh` - merged-gated worktree + branch teardown. Phase 8 / post-merge.
+- `${CLAUDE_PLUGIN_ROOT}/scripts/load-config.sh` - locate + resolve `ship-it.config` (defaults + `@FILE` inlining) to JSON. Load once up front.

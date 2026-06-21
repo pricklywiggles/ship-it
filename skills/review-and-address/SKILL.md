@@ -16,7 +16,7 @@ Review a diff with every configured reviewer in parallel, merge the findings, an
 
 ## 2. Read config, else defaults
 
-From `ship-it.config` (`ship-it.config.json` or `.claude/ship-it.config.json`):
+Load the resolved config via `${CLAUDE_PLUGIN_ROOT}/scripts/load-config.sh` (defaults applied, `@FILE` refs inlined); read keys with `jq`:
 - `review.reviewers` (the list; if absent, default to a single `pr-review-toolkit` agent reviewer),
 - `review.applyWarranted` (default: true in the orchestrator; for a standalone run, report unless asked to apply),
 - `verify`, `houseRules`, `safety` (for the address step).

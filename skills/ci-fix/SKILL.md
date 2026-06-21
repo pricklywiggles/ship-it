@@ -16,7 +16,7 @@ Drive a pull request's CI to green by watching it and fixing the cause of any fa
 
 ## 2. Read config, else defaults
 
-Read the project's `ship-it.config` if present (`ship-it.config.json`, or `.claude/ship-it.config.json`):
+Load the resolved config: `config="$("${CLAUDE_PLUGIN_ROOT}/scripts/load-config.sh")"` (it locates `ship-it.config.json`, applies defaults, and inlines `@FILE` refs). Read keys with `jq`:
 - `ci.fixAttempts` (default 2),
 - `verify` (commands to re-run after a fix; if absent, detect from package.json, e.g. lint + typecheck),
 - `houseRules` / `safety` (carry these into every edit and commit: no em dashes, no AI attribution, plus any project rails).

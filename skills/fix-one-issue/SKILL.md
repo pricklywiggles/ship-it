@@ -21,7 +21,7 @@ Take one work-unit's intent and land the smallest correct change for it in its b
 
 ## 2. Read config
 
-From `ship-it.config`:
+Load the resolved config via `${CLAUDE_PLUGIN_ROOT}/scripts/load-config.sh` (defaults applied, `@FILE` refs inlined); read keys with `jq`:
 - `houseRules` / `safety` (carry into every edit and the commit: no em dashes, no AI attribution, plus project rails, e.g. "read the framework doc first" if a project rule says so),
 - `verify` (the commands to run after the change),
 - `worktree.prepare` (the make-runnable command used above).
