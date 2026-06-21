@@ -19,14 +19,14 @@ Before touching anything, open with a short welcome that orients a first-time us
 > **The stages** (the named skills below also run on their own, and `init` configures or swaps each):
 >
 > - **implement** (`fix-one-issue`): make the change in a branch, verify, commit.
-> - **comment cleanup** (`comment-cleanup`): fix the comments the change added.
+> - **comment cleanup** (`comment-cleanup`): a pass that verifies and corrects comment overuse and verbosity in the change, keeping the non-obvious why and dropping narration.
 > - **review** (`review-and-address`): run your configured reviewers over the diff and apply the warranted feedback.
 > - **open the PR**: the orchestrator finalizes the branch and opens the PR.
 > - **docs**: parallel doc jobs keep your living docs current (specs, design system, architecture, generated wikis, whatever you configure).
 > - **CI** (`ci-fix`): watch the PR's checks and fix failures.
 > - **release** (`cut-release`, optional): propose a version, write notes, tag, publish.
 >
-> The **ship-issues** orchestrator runs these across a batch (independent work in parallel, overlapping work stacked on dependent branches); `init` adapts all of it to your project.
+> The **ship-issues** orchestrator runs these across a batch, working out which work-units can run in parallel and which must run sequentially (overlapping work is stacked on dependent branches so the PRs never collide); `init` adapts all of it to your project.
 >
 > **Right now, setup:** I'll (1) **detect** your project by reading the repo (read-only), (2) **ask** only what I cannot infer, explaining each question, (3) **check prerequisites** (tracker access, `gh` auth, doc-tool binaries), (4) **generate** a small doc-job skill for any doc you keep that has no built-in, and (5) **write** `ship-it.config.json`. The only things I create are that config and any generated skills; nothing else changes.
 
