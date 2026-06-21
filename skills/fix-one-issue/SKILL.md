@@ -1,6 +1,6 @@
 ---
 name: fix-one-issue
-description: Implement a single work-unit (a tracker issue or a described task) end to end in its branch: explore, make the smallest correct change, verify, and commit. Use for "implement this issue", "fix FRA-123", "make this change and verify it". The implement stage of the ship-it orchestrator, and usable standalone on an issue or a described task. Not for review (use review-and-address), comments (comment-cleanup), or CI (ci-fix).
+description: Implement a single work-unit (a tracker issue or a described task) end to end in its branch: explore, make the smallest correct change, verify, and commit. Use for "implement this issue", "fix issue 123", "make this change and verify it". The implement stage of the ship-it orchestrator, and usable standalone on an issue or a described task. Not for review (use review-and-address), comments (comment-cleanup), or CI (ci-fix).
 allowed-tools: Bash, Read, Edit, Write, Grep, Glob
 ---
 

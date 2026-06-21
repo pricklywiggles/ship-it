@@ -11,8 +11,8 @@
 #
 # Usage (run from inside the repo):
 #   setup-worktrees.sh --prepare ".claude/ship-it/prepare-worktree.sh {wt} {main}" <<'EOF'
-#   fra-111|user/fra-111-slug|main
-#   fra-112|user/fra-112-slug|main
+#   issue-1|you/issue-1-slug|main
+#   issue-2|you/issue-2-slug|main
 #   EOF
 set -euo pipefail
 

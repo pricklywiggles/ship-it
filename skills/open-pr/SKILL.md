@@ -38,7 +38,7 @@ Read the branch diff (`git -C <worktree> diff <prBase>...HEAD`) to ground the bo
 - **Summary**: what changed and why, scoped to this diff.
 - **Tracker link**: if the work-unit has an `id`/`url`, the link line that lets the merge auto-close the issue (e.g. a `## Linear` line linking `id` to `url`). Omit for ad-hoc work.
 - **Verification** (the load-bearing section): expand `prTemplate.verification` into **two parts**.
-  1. **Automated (done)**: the `verify` checks you actually ran and their result (e.g. biome, tsc, plus build/smoke when relevant).
+  1. **Automated (done)**: the `verify` checks you actually ran and their result (your configured lint, typecheck, and build/smoke checks).
   2. **Manual QA**: a GitHub checkbox list (`- [ ] ...`) of concrete steps a QA tester follows to verify the change in the running app, each step stating the action and the expected result, with a fenced code block of the exact commands (shell, queries, curl, devtools snippets) wherever a step needs them. Never write "left to the reviewer". If the change has no visual surface (pure API, types, ingest), give functional steps instead (curl with expected status, a query or smoke test). Honor every `safety` rail: keep private/personal values out of the PR (prefer counts, status codes, positions).
 
 No em dashes and no AI attribution anywhere in the title or body.

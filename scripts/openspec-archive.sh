@@ -2,11 +2,10 @@
 # Reconcile shipped OpenSpec changes into the canonical specs, post-merge. This is
 # the openspec author-reconcile doc job's reconcile step. Merged-gated: it archives
 # only changes whose feature PR has merged (a change folder reaches the default
-# branch only when its PR merges), then opens one batched archive PR. Mirrors the
-# proven Sanum helper, generalized to the repo's default branch.
+# branch only when its PR merges), then opens one batched archive PR.
 #
-# Docs-only and runs in a throwaway worktree, so the biome/tsc git hooks are skipped
-# with --no-verify (there is no node_modules there and nothing to lint).
+# Docs-only and runs in a throwaway worktree, so the repo's pre-commit/pre-push hooks
+# are skipped with --no-verify (there are no installed deps there and nothing to lint).
 #
 # Usage (run from inside the repo):
 #   openspec-archive.sh add-foo move-bar     # specific change ids

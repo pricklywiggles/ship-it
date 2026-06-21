@@ -1,6 +1,6 @@
 ---
 name: ship-issues
-description: Ship a batch of work-units (tracker issues, or the current local changes) end to end and concurrently: implement, comment-cleanup, review and address, then push and open a PR for each, keeping the project's living docs current. Use for "ship all the todo issues", "knock out fra-111 through 120", "batch-fix these tickets and open PRs", "clear the todo column", "run the multi-issue workflow". Resolves the work-unit set from config.source, groups into concurrent lanes, and chains the ship-it stage skills per work-unit. Checkpoints on a plan first. Not for a single existing PR (use the stage skills directly), cutting a release (cut-release), or just listing issues.
+description: Ship a batch of work-units (tracker issues, or the current local changes) end to end and concurrently: implement, comment-cleanup, review and address, then push and open a PR for each, keeping the project's living docs current. Use for "ship all the todo issues", "knock out issues 111 through 120", "batch-fix these tickets and open PRs", "clear the todo column", "run the multi-issue workflow". Resolves the work-unit set from config.source, groups into concurrent lanes, and chains the ship-it stage skills per work-unit. Checkpoints on a plan first. Not for a single existing PR (use the stage skills directly), cutting a release (cut-release), or just listing issues.
 allowed-tools: Bash, Read, Write, Edit, AskUserQuestion, Agent, Workflow, Skill, ToolSearch
 ---
 
@@ -11,7 +11,7 @@ Drive a set of work-units to open PRs concurrently, chaining the ship-it stage s
 ## Phase 1: Resolve the work-units
 
 **If the trigger names no issue selection, ask first** (do not default to a status like "all todo"): use `AskUserQuestion` to ask what to ship, a status, a range, specific ids, or the current changes, then resolve. When a selection is given, read `config.source` and expand it into concrete work-units:
-- **`tracker`**: list/get issues via the tracker adapter (`config.source.tracker`: type + project/team/idPrefix, or a custom resolver skill). A status ("all todo"), a range ("fra-111-120"), or an explicit list. Each work-unit carries `id`, `title`, `desc`, `branch` (the tracker's branch name, which carries the auto-close link), `url`.
+- **`tracker`**: list/get issues via the tracker adapter (`config.source.tracker`: type + project/team/idPrefix, or a custom resolver skill). A status ("all todo"), a range ("111-120"), or an explicit list. Each work-unit carries `id`, `title`, `desc`, `branch` (the tracker's branch name, which carries the auto-close link), `url`.
 - **`working-tree` / `branch` / `pr` / `describe`**: build a single work-unit from local state or a description.
 
 Read each item's full intent. If any is ambiguous in a way that changes the implementation, batch the open questions into one `AskUserQuestion` now. All interactivity is front-loaded here and at the Phase 3 checkpoint. See `references/sources.md` for the source dispatch, the built-in tracker adapters (`github-issues`, `linear`), the local sources (working-tree / branch / pr / describe), and the custom-tracker extension point.
