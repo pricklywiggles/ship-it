@@ -21,7 +21,7 @@ Before touching anything, open with a short welcome that orients a first-time us
 > - **implement** (`fix-one-issue`): make the change in a branch, verify, commit.
 > - **comment cleanup** (`comment-cleanup`): a pass that verifies and corrects comment overuse and verbosity in the change, keeping the non-obvious why and dropping narration.
 > - **review** (`review-and-address`): run your configured reviewers over the diff and apply the warranted feedback.
-> - **open the PR**: the orchestrator finalizes the branch and opens the PR.
+> - **open the PR** (`open-pr`): push the branch and open the PR with a QA-ready body.
 > - **docs**: parallel doc jobs keep your living docs current (specs, design system, architecture, generated wikis, whatever you configure).
 > - **CI** (`ci-fix`): watch the PR's checks and fix failures.
 > - **release** (`cut-release`, optional): propose a version, write notes, tag, publish.
@@ -52,7 +52,11 @@ First show the user a short summary of everything you detected (the values you w
 - **reviewers**: which to run on each diff (multi-select from detected + known). Default to `pr-review-toolkit`; if it is not installed, offer the install command or let them point at another. More than one is fine. The `ref` you write is the reviewer's **invocation** name, which can differ from the skill's folder name: Vercel's React Best Practices sits in the skills folder as `react-best-practices` but is invoked as `vercel-react-best-practices`, so detect it by the folder name and write `vercel-react-best-practices` as the `ref`.
 - **doc jobs**: which docs to keep current and the mechanic for each (regenerate / author-reconcile / curate-serial). Built-ins for openspec, graphify, impeccable; for any other doc, capture its path, mechanic, and how to update it (step 4 generates the job).
 - **safety rails**: any hard constraints workers must carry (e.g. "no personal data", "code-only verification").
-- **worktrees**: on or off, and the root. The **prepare** command runs *in the worktree*. First **look for an existing worktree-prepare script** (`fd -i prepare-worktree .claude`); if one exists and is complete, reference it as `<path> {wt} {main}` rather than scaffolding a thinner one. Otherwise scaffold a prepare that is **worktree-safe and complete**: the package manager's safe offline install (for pnpm, `CI=true pnpm install --frozen-lockfile --offline`, since a plain worktree install can repoint the main repo's `node_modules` store), plus everything the project needs to be runnable (for example a `src-tauri/` Tauri app must link its bundled sidecar resources, `sidecar.tar.gz` + `sidecar.version`). Write it to `.claude/ship-it/prepare-worktree.sh`, reference it as `.claude/ship-it/prepare-worktree.sh {wt} {main}`, and port the extra steps from any existing prepare script or ask the user. Never drop `CI=true` or a required build resource.
+- **worktrees**: on or off, and the root. The **prepare** command runs *in the worktree* and must leave it both **safe** (a plain worktree install can repoint the main repo's `node_modules` store, so for pnpm use `CI=true pnpm install --frozen-lockfile --offline`) and **runnable** (every step the app needs to start, e.g. a `src-tauri/` Tauri app must link its bundled sidecar resources `sidecar.tar.gz` + `sidecar.version`). The script must live at a **project-owned, ship-it-independent path** so it survives even if the project later retires whatever skill it came from. Resolve it in this order:
+  1. If `.claude/ship-it/prepare-worktree.sh` already exists, reference it as-is: `.claude/ship-it/prepare-worktree.sh {wt} {main}`.
+  2. Else look for an existing prepare script (`fd -i prepare-worktree .claude`). If a complete one lives **inside a directory ship-it supersedes** (e.g. `.claude/skills/ship-issues/`), do **not** reference it in place (it vanishes when that skill is removed): copy it to `.claude/ship-it/prepare-worktree.sh`, make the install worktree-safe (add `CI=true` if missing), and reference the copy.
+  3. Else scaffold `.claude/ship-it/prepare-worktree.sh` from scratch: the safe offline install plus every runnable step (port the extras from any existing script, or ask the user).
+  Never drop `CI=true` or a required build resource, and never reference a prepare script inside a directory ship-it will delete.
 - **concurrency**: max parallel lanes.
 - **releases (optional)**: whether to set up release management at all; if yes, capture the version source, tag format, notes style, and build to watch, and set `release.enabled` true; if no, omit the `release` block.
 
@@ -76,4 +80,4 @@ Write `ship-it.config.json` at the project root (or `.claude/ship-it.config.json
 
 ## 6. Summary
 
-Tell the user the config is written, list any unmet prerequisites with their install commands, and point them at the next step: run `ship-it:ship-issues` for a batch, or any stage skill standalone (`ship-it:ci-fix`, `ship-it:review-and-address`, `ship-it:fix-one-issue`, `ship-it:comment-cleanup`).
+Tell the user the config is written, list any unmet prerequisites with their install commands, and point them at the next step: run `ship-it:ship-issues` for a batch, or any stage skill standalone (`ship-it:fix-one-issue`, `ship-it:comment-cleanup`, `ship-it:review-and-address`, `ship-it:open-pr`, `ship-it:ci-fix`).

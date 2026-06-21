@@ -85,7 +85,7 @@ async function runIssue(issue) {
   }
   const review = await agent(invoke('ship-it:review-and-address', issue, `Review the diff ${issue.base}...HEAD. Apply warranted per config.review.applyWarranted. Commit, do not push.`),
     { label: `review:${issue.id}`, phase: 'Review', schema: REVIEW_SCHEMA })
-  const fin = await agent(`Finalize work-unit ${issue.id} in ${issue.wt} (read config at ${configPath}). Push ${issue.branch} to ${repo}; open a PR with base ${issue.prBase} using config.prTemplate. Honor config.houseRules (no em dashes, no AI attribution). Retry push/PR once on failure. Return the structured result.`,
+  const fin = await agent(invoke('ship-it:open-pr', issue, `Push ${issue.branch} to ${repo} and open its PR with base ${issue.prBase}. Build the body from config.prTemplate (two-part Verification).`),
     { label: `pr:${issue.id}`, phase: 'Finalize', schema: FINAL_SCHEMA })
   return { ...fin, docNeed: impl.docNeed, docRationale: impl.docRationale, addedComments: impl.addedComments, review }
 }

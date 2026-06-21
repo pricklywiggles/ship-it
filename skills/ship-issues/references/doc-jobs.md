@@ -13,7 +13,7 @@ DocJob { name, mechanic: "regenerate" | "author-reconcile" | "curate-serial", re
 ## The three mechanics
 
 ### regenerate
-Re-derive the doc from the merged code; no authoring. Run the job's command, e.g. `graphify update .`. Idempotent and cheap; run it once after the batch. Built-in: **graphify**.
+Re-derive the doc from the merged code; no authoring. Run the job's command, e.g. `graphify update .`. Idempotent and cheap, but it reads the code, so run it **after the feature PRs merge** (the pre-merge base branch does not have the changes yet), once, alongside any author-reconcile reconcile. Built-in: **graphify**.
 
 ### author-reconcile
 Two steps split across the merge boundary:
@@ -26,7 +26,7 @@ Update a shared prose doc, serialized because the file is shared. The workers on
 ## Fan-out (Phase 6)
 
 After the Workflow returns, collect each shipped work-unit's `docNeed`. For each job in `config.docs.jobs` whose `appliesWhen` matched at least one, run it, in parallel across jobs (different files):
-- **regenerate**: run the command.
+- **regenerate**: defer to post-merge (Phase 7), like an author-reconcile reconcile; running it against the pre-merge base would capture none of the batch's changes.
 - **author-reconcile**: the author step already ran per work-unit during the Workflow; defer the reconcile to post-merge (Phase 7).
 - **curate-serial**: do the single serial write now (consolidated if several triggered it).
 
@@ -34,13 +34,13 @@ Skip jobs with no match. Most work-units are `none`; do not over-document.
 
 ## Post-merge reconcile (Phase 7)
 
-For author-reconcile jobs, the canonical docs only update after the feature PRs merge. Launch the merge-watcher:
+For author-reconcile **and regenerate** jobs, the canonical or derived docs only update after the feature PRs merge. Launch the merge-watcher:
 
 ```bash
 "${CLAUDE_PLUGIN_ROOT}/scripts/watch-merges.sh" --prs <pr-csv> --reconcile "<reconcile command>"
 ```
 
-It polls until the PRs are merged or closed (or a timeout), then runs the reconcile (e.g. `"${CLAUDE_PLUGIN_ROOT}/scripts/openspec-archive.sh" <change-ids>`), which opens the batched docs PR. On timeout it prints the manual reconcile command. In-session only; closing the session falls back to running the reconcile by hand.
+`<reconcile command>` composes every post-merge doc job joined with `&&`: each author-reconcile reconcile (e.g. `"${CLAUDE_PLUGIN_ROOT}/scripts/openspec-archive.sh" <change-ids>`) and each regenerate command (e.g. `graphify update .`). The watcher polls until the PRs are merged or closed (or a timeout), then runs it against the merged code, archiving specs, regenerating derived docs, and opening the batched docs PR. On timeout it prints the manual command. In-session only; closing the session falls back to running it by hand.
 
 ## Built-in jobs
 

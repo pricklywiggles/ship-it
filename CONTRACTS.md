@@ -66,11 +66,12 @@ Each is a standalone skill with a flexible front-door: invoked by an orchestrato
 | `fix-one-issue` | implement the work-unit's intent, verify, commit | uses `houseRules` + `verify`; the core |
 | `comment-cleanup` | audit + fix comments in the work-unit's diff | shipped (first inhabitant) |
 | `review-and-address` | fan out `review.reviewers` over the diff, merge findings, optionally apply warranted | see Reviewers |
+| `open-pr` | push the finished branch, open the PR with a two-part QA-ready body from `prTemplate` | finalize stage; standalone too |
 | `ci-fix` | watch the work-unit's PR CI, fix failures (bounded, cause-only) | primitive: `scripts/ci-watch.sh` |
 
 ## Reviewers (read-only, parallel fan-out)
 
-`review-and-address` runs every configured reviewer over the work-unit's diff in parallel (read-only, so safe, and it nests inside the lanes), merges and de-duplicates the findings, then the address step applies the warranted ones (a write step, in finalize). Standalone, it reports the merged findings and offers to apply.
+`review-and-address` runs every configured reviewer over the work-unit's diff in parallel (read-only, so safe, and it nests inside the lanes), merges and de-duplicates the findings, then the address step applies the warranted ones (a write step, inside `review-and-address` itself; `open-pr` only pushes what is committed). Standalone, it reports the merged findings and offers to apply.
 
 ```
 Reviewer {
@@ -110,7 +111,7 @@ Built-in jobs: `graphify` (regenerate), `openspec` (author-reconcile), `impeccab
 ## Orchestrators
 
 ### ship-issues (batch)
-`resolve work-units (source)` -> `scope + group into lanes (overlap graph)` -> Workflow fan-out, per work-unit: `fix-one-issue` -> `comment-cleanup` (if comments changed) -> `review-and-address` -> `finalize` (apply review, push, open PR) -> `doc phase` (parallel doc jobs) -> post-PR watchers (CI fan-out per PR; merge watcher then archive). Lanes concurrent; stacked within a lane.
+`resolve work-units (source)` -> `scope + group into lanes (overlap graph)` -> Workflow fan-out, per work-unit: `fix-one-issue` -> `comment-cleanup` (if comments changed) -> `review-and-address` (apply warranted) -> `open-pr` (push, open PR) -> `doc phase` (curate-serial writes now; author-reconcile + regenerate deferred) -> post-PR watchers (CI fan-out per PR; merge watcher then archive + regenerate). Lanes concurrent; stacked within a lane.
 
 ### cut-release
 `analyze commits since last published release` -> `propose semver bump` -> `write user-facing notes` -> `open version-bump PR` -> after merge: `tag`, `watch build`, `publish notes`. Project specifics (version source, tag format, notes style, build to watch) are config.
@@ -149,5 +150,5 @@ Detect-first, ask-second. Detects package manager, verify command, CI system, tr
 
 ## Status
 
-- **Built (in plugin)**: stage skills `comment-cleanup`, `ci-fix`, `review-and-address`, `fix-one-issue`; the `ship-issues` orchestrator (lanes + the Workflow template chaining the stage skills) with built-in **sources** resolution and **doc-job runners** (`references/doc-jobs.md`: the three mechanics, built-in graphify/openspec/impeccable jobs, the post-merge reconcile flow); the **`init`** front-door skill (detect + interview + write `ship-it.config` + generate novel doc-job skills); a shared **config-loader** (`scripts/load-config.sh`: locate + default + inline `@FILE` refs, so skills read the config uniformly); bundled scripts `ci-watch.sh`, `openspec-archive.sh`, `watch-merges.sh`, `setup-worktrees.sh`, `cleanup-worktrees.sh`, `load-config.sh`. The optional, config-gated **`cut-release`** orchestrator (gated by `release.enabled`: analyze commits since the last release, propose a bump, version PR, then post-merge tag + watch-build + publish) with bundled `scripts/release-publish.sh`.
+- **Built (in plugin)**: stage skills `comment-cleanup`, `ci-fix`, `review-and-address`, `fix-one-issue`, `open-pr`; the `ship-issues` orchestrator (lanes + the Workflow template chaining the stage skills) with built-in **sources** resolution and **doc-job runners** (`references/doc-jobs.md`: the three mechanics, built-in graphify/openspec/impeccable jobs, the post-merge reconcile flow); the **`init`** front-door skill (detect + interview + write `ship-it.config` + generate novel doc-job skills); a shared **config-loader** (`scripts/load-config.sh`: locate + default + inline `@FILE` refs, so skills read the config uniformly); bundled scripts `ci-watch.sh`, `openspec-archive.sh`, `watch-merges.sh`, `setup-worktrees.sh`, `cleanup-worktrees.sh`, `load-config.sh`. The optional, config-gated **`cut-release`** orchestrator (gated by `release.enabled`: analyze commits since the last release, propose a bump, version PR, then post-merge tag + watch-build + publish) with bundled `scripts/release-publish.sh`.
 - **To build, in order**: validate on a second, non-Sanum repo (the abstraction test).
