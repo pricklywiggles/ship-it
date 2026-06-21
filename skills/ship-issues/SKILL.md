@@ -10,7 +10,7 @@ Drive a set of work-units to open PRs concurrently, chaining the ship-it stage s
 
 ## Phase 1: Resolve the work-units
 
-Read `config.source` and expand the trigger's selection into concrete work-units:
+**If the trigger names no issue selection, ask first** (do not default to a status like "all todo"): use `AskUserQuestion` to ask what to ship, a status, a range, specific ids, or the current changes, then resolve. When a selection is given, read `config.source` and expand it into concrete work-units:
 - **`tracker`**: list/get issues via the tracker adapter (`config.source.tracker`: type + project/team/idPrefix, or a custom resolver skill). A status ("all todo"), a range ("fra-111-120"), or an explicit list. Each work-unit carries `id`, `title`, `desc`, `branch` (the tracker's branch name, which carries the auto-close link), `url`.
 - **`working-tree` / `branch` / `pr` / `describe`**: build a single work-unit from local state or a description.
 
