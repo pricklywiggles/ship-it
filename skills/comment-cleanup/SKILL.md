@@ -28,7 +28,7 @@ Keep a comment **only** if it explains a non-obvious *why* that the code cannot
 be made to express on its own. Legitimate categories:
 
 - **Business / domain rule** that constrains the code but is not derivable from
-  it ("uncategorized labs are excluded because the importer double-counts them").
+  it ("archived rows are excluded here because the exporter counts them separately").
 - **Edge case or workaround** ("WKWebView fires this twice on macOS; the second
   is ignored").
 - **Historical / architectural decision** ("built in Rust instead of config
@@ -48,7 +48,7 @@ Delete or rewrite everything else.
 
 A comment that describes *what the next line(s) do* is never acceptable, and
 this is not a judgment call to hand back to the user. If the code's purpose is
-not clear without a narrating comment, **the code is the problem** — fix it:
+not clear without a narrating comment, **the code is the problem**, fix it:
 rename a variable or function, extract a well-named helper, introduce an
 intermediate named value, or simplify the control flow. Only if the logic is
 genuinely irreducibly subtle does it get a comment, and then the comment
@@ -57,10 +57,10 @@ explains *why it must be this way*, not *what it does*.
 Examples of narration to remove (and instead clarify the code):
 
 - `// loop through the users` above a `for` loop.
-- `// Category roots get no menu; subfolders edit only` above the exact
+- `// Admins skip the quota check; everyone else is limited` above the exact
   conditionals that compute that. The variable names should say it.
-- `// Mirrors the app's popover: bg-popover, ring-1, shadow-md` above a class
-  string that literally contains `bg-popover ring-1 shadow-md`.
+- `// rounded card with a subtle border and shadow` above a class
+  string that literally contains `rounded-lg border shadow-sm`.
 - A docstring that re-lists the parameters and their obvious meanings.
 
 When you remove a narration comment, in the same change make the code
@@ -97,7 +97,7 @@ self-explanatory if it wasn't already, and say what you renamed/extracted.
   not a KEEP. Default to TRIM for any multi-sentence comment until you have
   justified each sentence independently.
 
-  Example trim: "`label/icon edit; the server rejects fixed roots. A label
+  Example trim: "`updates the title; the API rejects edits to locked items. A title
   change can surface anywhere, so clear all caches.`" → keep only the
   cache-invalidation rationale; the rest restates the function.
 - **No commented-out code.** Delete it. Version control remembers.
@@ -134,7 +134,7 @@ The caller may pass a scope. Honor it literally:
 - **"branch" / "branch diff" / "the PR"** → diff vs the base branch (below).
 - A **commit range** → that range.
 
-If **no scope is given**, default to *newly written or changed code only* — the
+If **no scope is given**, default to *newly written or changed code only*, the
 uncommitted working tree plus any commits on this branch that are not on the
 main branch. Never audit the entire repository by default; that would drown the
 signal and re-litigate code the user did not touch.
@@ -170,12 +170,12 @@ on, not just the comment text.
    Default to TRIM for any multi-sentence comment; promote to KEEP only after
    justifying every sentence independently.
 3. Assign a **verdict**:
-   - **KEEP** — non-obvious why, *and every sentence in the comment earns its
+   - **KEEP**: non-obvious why, *and every sentence in the comment earns its
      place independently*. Quote it, name the category.
-   - **TRIM** — contains a real why alongside narration, restatement, or
+   - **TRIM**: contains a real why alongside narration, restatement, or
      mechanism description. Give the exact shortened text. This is the
      expected verdict for most multi-sentence comments.
-   - **REMOVE** — narration, duplication, obvious, commented-out code, or
+   - **REMOVE**: narration, duplication, obvious, commented-out code, or
      ceremonial header. If it was narration masking unclear code, also give the
      concrete code change (rename/extract) that makes the comment unnecessary.
 4. **Apply** the TRIM/REMOVE edits (and any accompanying code-clarity change),
@@ -193,12 +193,12 @@ Audited 14 comments in <scope>. Verdict: 6 keep, 3 trim, 5 remove.
 
 | Location | Comment (truncated) | Why we need it | Verdict |
 |---|---|---|---|
-| folder-tree.tsx:148 | "Computed once here so the memoized child stays stable" | perf rationale, non-obvious | KEEP |
-| route.ts:62 | "label/icon edit. updateFolder is the single protected-root authority" | 1st clause restates the handler | TRIM → "updateFolder is the single protected-root authority." |
-| folder-tree.tsx:864 | "Category roots get no menu; subfolders edit only..." | narrates the conditionals below it | REMOVE (names already say it) |
+| tree-view.tsx:148 | "Computed once here so the memoized child stays stable" | perf rationale, non-obvious | KEEP |
+| api/items/route.ts:62 | "title edit. updateItem is the single permission authority" | 1st clause restates the handler | TRIM → "updateItem is the single permission authority." |
+| tree-view.tsx:864 | "Guests get read-only; members can edit..." | narrates the conditionals below it | REMOVE (names already say it) |
 
 Skipped (out of scope): 2 pre-existing comments moved by the refactor
-(folder-pin.ts:3, folder-tree.tsx:861); 1 biome-ignore directive.
+(item-pin.ts:3, tree-view.tsx:861); 1 biome-ignore directive.
 ```
 
 Finally provide a summary of the changes in this form: "comment % removed: X% (Y chars removed, down from Z)"
@@ -212,5 +212,5 @@ renamed or extracted so the diff is reviewable.
 The user does not want borderline narration calls deferred to them. If a comment
 narrates the code, it goes, and the code is made clear enough to stand alone.
 Reserve genuine questions for cases where the *why* itself is unknown to you
-(e.g. a comment asserts a business rule you cannot verify) — there, ask, because
+(e.g. a comment asserts a business rule you cannot verify), there, ask, because
 inventing a rationale is worse than removing the comment.
