@@ -45,7 +45,9 @@ while IFS='|' read -r id branch base; do
   fi
   if [ -n "$PREPARE" ]; then
     cmd="${PREPARE//\{wt\}/$wt}"; cmd="${cmd//\{main\}/$MAIN}"
-    ( cd "$MAIN" && eval "$cmd" )
+    # Prepare runs IN the worktree so a plain install lands there; {wt}/{main} are
+    # still substituted for prepare commands that need the explicit paths.
+    ( cd "$wt" && eval "$cmd" )
   fi
   echo "ready: $wt -> $(git -C "$wt" rev-parse --abbrev-ref HEAD)"
 done

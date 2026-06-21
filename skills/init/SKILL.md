@@ -26,11 +26,11 @@ Read the repo and record what you find:
 
 Present what you detected, then batch the open questions into `AskUserQuestion` (a few at a time):
 - **tracker**: confirm the type; for Linear, the project + team + id prefix; for github-issues, the "todo" label.
-- **merge strategy**: squash / merge / rebase (cannot be detected reliably; it changes stacked-PR and archive behavior).
+- **merge strategy**: squash / merge / rebase. It cannot be fully detected and it changes stacked-PR and archive behavior, so propose a default from the repo's allowed methods (`gh api repos/{owner}/{repo} -q '{squash: .allow_squash_merge, merge: .allow_merge_commit, rebase: .allow_rebase_merge}'`), then confirm with the user.
 - **reviewers**: which to run on each diff (multi-select from detected + known). Default to `pr-review-toolkit`; if it is not installed, offer the install command or let them point at another. More than one is fine.
 - **doc jobs**: which docs to keep current and the mechanic for each (regenerate / author-reconcile / curate-serial). Built-ins for openspec, graphify, impeccable; for any other doc, capture its path, mechanic, and how to update it (step 4 generates the job).
 - **safety rails**: any hard constraints workers must carry (e.g. "no personal data", "code-only verification").
-- **worktrees**: on or off, the root, and the prepare command (a project script when prep is more than a plain install).
+- **worktrees**: on or off, and the root. The **prepare** command runs *in the worktree*, so for a plain dependency setup emit the package manager's frozen offline install (e.g. `pnpm install --frozen-lockfile --offline`). If the project needs more to be runnable (for example a `src-tauri/` Tauri app must link its bundled sidecar resources, or a monorepo needs a workspace install), reference an existing project prepare script if one is present, otherwise scaffold `.claude/ship-it/prepare-worktree.sh` that does the install plus those steps and reference it as `.claude/ship-it/prepare-worktree.sh {wt} {main}`, asking the user for the extra steps if you cannot infer them. Never emit a prepare that silently drops required steps.
 - **concurrency**: max parallel lanes.
 - **releases (optional)**: whether to set up release management at all; if yes, capture the version source, tag format, notes style, and build to watch, and set `release.enabled` true; if no, omit the `release` block.
 
@@ -46,7 +46,7 @@ Check and report (warn, do not fail):
 
 ## 4. Generate doc-job skills for novel docs
 
-For each doc the user named that has no built-in job, invoke **skill-creator** (Skill tool) to write a **project-local** skill (in this project's `.claude/skills/`, not the plugin) that updates that doc by the chosen mechanic, given the shipped changes. Register it in the config's `docs.jobs` by its name. Built-in docs (openspec, graphify, impeccable) need no generation; reference them directly.
+For each doc the user named that has no built-in job, invoke **skill-creator** (Skill tool) to write a **project-local** skill (in this project's `.claude/skills/`, not the plugin) that updates that doc by the chosen mechanic, given the shipped changes. Ensure the generated skill declares `allowed-tools` (at least Bash, Read, Edit) so it can compute the diff and edit its doc. Register it in the config's `docs.jobs` by its bare name. Built-in docs (openspec, graphify, impeccable) need no generation; reference them directly.
 
 ## 5. Write ship-it.config
 

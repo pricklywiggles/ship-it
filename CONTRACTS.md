@@ -128,7 +128,7 @@ JSON (JSONC accepted). Most keys optional; detection + defaults fill the rest. S
 | `houseRules` | text, or `@FILE` to derive from AGENTS.md/CLAUDE.md; injected into every worker prompt |
 | `safety` | hard rails carried by every worker (e.g. "no personal health data") |
 | `verify` | command(s) run inside the worktree after a change; `{changedFiles}` placeholder |
-| `worktree.enabled` / `.root` / `.prepare` | worktree on/off, location, and the make-runnable hook |
+| `worktree.enabled` / `.root` / `.prepare` | worktree on/off, location, and the make-runnable hook (runs in the worktree; `{wt}`/`{main}` substituted) |
 | `concurrency.maxLanes` | parallel lane cap |
 | `review.reviewers` | the reviewer list (parallel fan-out) |
 | `ci.watch` / `.fixAttempts` | CI watch + bounded auto-fix |
