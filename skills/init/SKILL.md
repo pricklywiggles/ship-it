@@ -24,7 +24,6 @@ Before touching anything, open with a short welcome that orients a first-time us
 > - **open the PR** (`open-pr`): push the branch and open the PR with a QA-ready body.
 > - **docs**: parallel doc jobs keep your living docs current (specs, design system, architecture, generated wikis, whatever you configure).
 > - **CI** (`ci-fix`): watch the PR's checks and fix failures.
-> - **release** (`cut-release`, optional): propose a version, write notes, tag, publish.
 >
 > The **ship-issues** orchestrator runs these across a batch, working out which work-units can run in parallel and which must run sequentially (overlapping work is stacked on dependent branches so the PRs never collide); `init` adapts all of it to your project.
 >
@@ -59,7 +58,6 @@ First show the user a short summary of everything you detected (the values you w
   3. Else scaffold `.claude/ship-it/prepare-worktree.sh` from scratch: the safe offline install plus every runnable step (port the extras from any existing script, or ask the user).
   Never drop `CI=true` or a required build resource, and never reference a prepare script inside a directory ship-it will delete. Finally, capture any **run/QA caveats** for the runnable worktrees as `worktree.qaNotes` (e.g. "only one app instance at a time, shared DB lock; quit others first"); the orchestrator surfaces these when it hands the worktrees back for QA. They are human notes, not worker rails.
 - **concurrency**: max parallel lanes.
-- **releases (optional)**: whether to set up release management at all; if yes, capture the version source, tag format, notes style, and build to watch, and set `release.enabled` true; if no, omit the `release` block.
 
 Confirm the detected values in bulk rather than re-asking them, and ask only what is genuinely unknown, but always with the context above so the user understands each choice rather than guessing.
 
@@ -98,7 +96,6 @@ Write the config to **`.claude/ship-it/config.json`** (ship-it's project home, b
 - `ci`: `{ watch (boolean on/off, default true; never a workflow path), fixAttempts }`.
 - `docs.jobs`: array of `{ name, mechanic (regenerate|author-reconcile|curate-serial), ref, target, appliesWhen }`; `ref` is the command/skill, `appliesWhen` the docNeed that triggers it (a regenerate job may omit `appliesWhen`).
 - `prTemplate`: `{ sections, verification }`.
-- `release`: `{ enabled, versionSource, tagFormat, notesStyle, watchBuild }`.
 
 **Then validate in a loop.** Run `${CLAUDE_PLUGIN_ROOT}/scripts/validate-config.sh <path>` and fix every error it reports, re-running until it prints `OK`. The validator (schema in `scripts/config.schema.jq`) is the schema of record; the config is not done until it passes. Resolve warnings too, or note why not. Then show the user the final, validated config.
 

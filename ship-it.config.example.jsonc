@@ -90,14 +90,5 @@
   "prTemplate": {
     "sections": ["Summary", "Linear", "Verification"],
     "verification": "two-part: (1) automated checks run with results; (2) a GitHub checkbox list of concrete visual/clinical QA steps with exact commands/queries. Never 'left to the reviewer'. No personal health values in the PR."
-  },
-
-  // release management is optional; omit this block or set "enabled": false to turn it off
-  "release": {
-    "enabled": true,
-    "versionSource": "package.json",
-    "tagFormat": "v{version}",
-    "notesStyle": "user-facing",
-    "watchBuild": "release.yml"
   }
 }

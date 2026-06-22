@@ -1,6 +1,6 @@
 ---
 name: ship-issues
-description: Ship a batch of work-units (tracker issues, or the current local changes) end to end and concurrently: implement, comment-cleanup, review and address, then push and open a PR for each, keeping the project's living docs current. Use for "ship all the todo issues", "knock out issues 111 through 120", "batch-fix these tickets and open PRs", "clear the todo column", "run the multi-issue workflow". Resolves the work-unit set from config.source, groups into concurrent lanes, and chains the ship-it stage skills per work-unit. Checkpoints on a plan first. Not for a single existing PR (use the stage skills directly), cutting a release (cut-release), or just listing issues.
+description: Ship a batch of work-units (tracker issues, or the current local changes) end to end and concurrently: implement, comment-cleanup, review and address, then push and open a PR for each, keeping the project's living docs current. Use for "ship all the todo issues", "knock out issues 111 through 120", "batch-fix these tickets and open PRs", "clear the todo column", "run the multi-issue workflow". Resolves the work-unit set from config.source, groups into concurrent lanes, and chains the ship-it stage skills per work-unit. Checkpoints on a plan first. Not for a single existing PR (use the stage skills directly) or just listing issues.
 allowed-tools: Bash, Read, Write, Edit, AskUserQuestion, Agent, Workflow, Skill, ToolSearch
 ---
 

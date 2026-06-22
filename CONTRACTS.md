@@ -8,7 +8,7 @@ Living draft. The interfaces are the part to keep stable; the rest is refinable.
 
 ship-it is three layers:
 
-1. **Orchestrators** (generic, project-agnostic): the batch issue-shipper (`ship-issues`) and the release-cutter (`cut-release`). They own lane grouping, the concurrent Workflow fan-out, the worktree lifecycle, and the post-PR watchers. They contain no project specifics.
+1. **Orchestrator** (generic, project-agnostic): the batch issue-shipper (`ship-issues`). It owns lane grouping, the concurrent Workflow fan-out, the worktree lifecycle, and the post-PR watchers. It contains no project specifics.
 2. **Stage skills** (reusable units of work): each operates on a *work-unit* and is individually callable, both from an orchestrator's parallel workers and by a user on its own.
 3. **Per-project config** (`ship-it.config`): values, command strings, and adapter references that adapt the generic engine to a project. Produced by `init`.
 
@@ -113,9 +113,6 @@ Built-in jobs: `graphify` (regenerate), `openspec` (author-reconcile), `impeccab
 ### ship-issues (batch)
 `resolve work-units (source)` -> `scope + group into lanes (overlap graph)` -> Workflow fan-out, per work-unit: `fix-one-issue` -> `comment-cleanup` (if comments changed) -> `review-and-address` (apply warranted) -> `open-pr` (push, open PR) -> `doc phase` (curate-serial writes now; author-reconcile + regenerate deferred) -> post-PR watchers (CI fan-out per PR; merge watcher then archive + regenerate). Lanes concurrent; stacked within a lane.
 
-### cut-release
-`analyze commits since last published release` -> `propose semver bump` -> `write user-facing notes` -> `open version-bump PR` -> after merge: `tag`, `watch build`, `publish notes`. Project specifics (version source, tag format, notes style, build to watch) are config.
-
 ## ship-it.config keys
 
 JSON (JSONC accepted). Lives at `.claude/ship-it/config.json` (with `ship-it.config.json` at the repo root and `.claude/ship-it.config.json` as loader fallbacks). Most keys optional; detection + defaults fill the rest. See the example file for concrete Sanum values.
@@ -135,7 +132,6 @@ JSON (JSONC accepted). Lives at `.claude/ship-it/config.json` (with `ship-it.con
 | `ci.watch` / `.fixAttempts` | CI watch + bounded auto-fix |
 | `docs.jobs` | the doc-job list (parallel fan-out) |
 | `prTemplate` | PR body shape (Summary / tracker link / two-part Verification) |
-| `release.*` | cut-release: version source, tag format, notes style, build to watch |
 
 The authoritative shape is `scripts/config.schema.jq`; `scripts/validate-config.sh` checks a config against it (used by `init` in an edit-fix loop, and runnable standalone whenever the config is edited).
 
@@ -152,5 +148,5 @@ Detect-first, ask-second. Detects package manager, verify command, CI system, tr
 
 ## Status
 
-- **Built (in plugin)**: stage skills `comment-cleanup`, `ci-fix`, `review-and-address`, `fix-one-issue`, `open-pr`; the `ship-issues` orchestrator (lanes + the Workflow template chaining the stage skills) with built-in **sources** resolution and **doc-job runners** (`references/doc-jobs.md`: the three mechanics, built-in graphify/openspec/impeccable jobs, the post-merge reconcile flow); the **`init`** front-door skill (detect + interview + write `ship-it.config` + generate novel doc-job skills); a shared **config-loader** (`scripts/load-config.sh`: locate + default + inline `@FILE` refs, so skills read the config uniformly); bundled scripts `ci-watch.sh`, `openspec-archive.sh`, `watch-merges.sh`, `setup-worktrees.sh`, `cleanup-worktrees.sh`, `load-config.sh`. The optional, config-gated **`cut-release`** orchestrator (gated by `release.enabled`: analyze commits since the last release, propose a bump, version PR, then post-merge tag + watch-build + publish) with bundled `scripts/release-publish.sh`.
+- **Built (in plugin)**: stage skills `comment-cleanup`, `ci-fix`, `review-and-address`, `fix-one-issue`, `open-pr`; the `ship-issues` orchestrator (lanes + the Workflow template chaining the stage skills) with built-in **sources** resolution and **doc-job runners** (`references/doc-jobs.md`: the three mechanics, built-in graphify/openspec/impeccable jobs, the post-merge reconcile flow); the **`init`** front-door skill (detect + interview + write `ship-it.config` + generate novel doc-job skills); a shared **config-loader** (`scripts/load-config.sh`: locate + default + inline `@FILE` refs, so skills read the config uniformly); bundled scripts `ci-watch.sh`, `openspec-archive.sh`, `watch-merges.sh`, `setup-worktrees.sh`, `cleanup-worktrees.sh`, `load-config.sh`.
 - **To build, in order**: validate on a second, non-Sanum repo (the abstraction test).

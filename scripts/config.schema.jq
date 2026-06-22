@@ -12,7 +12,7 @@ def allowed($keys; $label):
 {
   errors: ([
 
-    allowed(["repo","source","houseRules","safety","verify","worktree","concurrency","review","ci","docs","prTemplate","release"]; "(top level)"),
+    allowed(["repo","source","houseRules","safety","verify","worktree","concurrency","review","ci","docs","prTemplate"]; "(top level)"),
 
     (if (.repo|type) == "object" then (.repo | allowed(["mainBranch","mergeStrategy","slug"]; "repo")) else [] end),
     (.repo.mergeStrategy as $ms | if ($ms != null) and ((["squash","merge","rebase"] | index($ms)) == null)
@@ -56,11 +56,6 @@ def allowed($keys; $label):
     (if (.prTemplate|type) == "object" then
        (.prTemplate | allowed(["sections","verification"]; "prTemplate"))
        + (if .prTemplate.verification == null then ["prTemplate.verification is required (the rule for the Verification section)"] else [] end)
-     else [] end),
-
-    (if (.release.enabled == true) then
-       (.release | allowed(["enabled","versionSource","tagFormat","notesStyle","watchBuild"]; "release"))
-       + (if .release.watchBuild == null then ["release.watchBuild is required when release.enabled is true (the CI build to watch, e.g. 'release.yml')"] else [] end)
      else [] end)
 
   ] | flatten),
