@@ -77,7 +77,7 @@ For each doc the user named that has no built-in job, create a **project-local**
 **Write this `SKILL.md` yourself, now, in this step**, then continue. It is a static file; nothing runs asynchronously and there is nothing to wait for. If you call the **skill-creator** skill for a richer scaffold, understand the Skill tool only *loads its authoring steps into your own context*, it does not spawn a background worker: follow those steps yourself and `Write` the file in this same turn. Never pause waiting for skill-creator (or any invoked skill) to "finish" on its own.
 
 The file must:
-- declare `allowed-tools` (at least `Bash, Read, Edit`) so it can diff the change and edit its doc,
+- declare `allowed-tools` as a **top-level** front-matter key (a sibling of `name` and `description`, never nested under `metadata:`, where the loader ignores it), at least `Bash, Read, Edit`, so it can diff the change and edit its doc,
 - carry a description that triggers both from the ship-it doc phase and from a manual "update `<doc>` for this change",
 - classify whether a given diff is in scope for the doc, then act by mechanic (curate-serial: edit only the affected sections; regenerate: run the command; author-reconcile: author the per-unit artifact),
 - include a brief project-context section so the skill is grounded in this repo,
