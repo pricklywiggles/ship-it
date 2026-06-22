@@ -1,7 +1,7 @@
 ---
 name: fix-one-issue
 description: Implement a single work-unit (a tracker issue or a described task) end to end in its branch: explore, make the smallest correct change, verify, and commit. Use for "implement this issue", "fix issue 123", "make this change and verify it". The implement stage of the ship-it orchestrator, and usable standalone on an issue or a described task. Not for review (use review-and-address), comments (comment-cleanup), or CI (ci-fix).
-allowed-tools: Bash, Read, Edit, Write, Grep, Glob
+allowed-tools: Bash, Read, Edit, Write, Grep, Glob, WebFetch, WebSearch, ToolSearch
 ---
 
 # fix-one-issue: implement, verify, commit
@@ -31,8 +31,9 @@ Load the resolved config via `${CLAUDE_PLUGIN_ROOT}/scripts/load-config.sh` (def
 If the work-unit carries a `plan` (from the planning stage), implement against it: the plan names the steps, files, and edge cases, so follow it rather than re-deriving the approach. For a **stacked child** (its `base` is a sibling branch, not `config.repo.mainBranch`), the plan was drafted before the parent landed, so first reconcile it with the parent's committed work: read `git -C <worktree> diff <config.repo.mainBranch>...HEAD` (everything the parent already put on your base) and adjust the plan for it before coding. With no plan (standalone, or planning disabled), proceed from exploration.
 
 1. Explore the working copy to find the exact code, or confirm the plan's predicted files; scope every search to it.
-2. Make the **smallest correct change** that fully resolves the intent, following the plan when present. Match surrounding style and conventions. If reality diverges from the plan, do the correct thing and note the divergence.
-3. Stay in scope: resolve this work-unit, nothing else.
+2. **Verify every external API before you write it. Do not write a single call into a third-party package, framework, runtime, or platform API from memory.** Training data lags the installed version, and a hallucinated attribute or a renamed option is how confidently-broken code ships. Read the version from `package.json` / the lockfile (or `Cargo.toml`, `go.mod`, ...), then confirm the exact symbol, signature, options, and behavior against THAT version: check the package's shipped docs and types in `node_modules` (a `docs/` folder, an `llms.txt`, an `AGENTS.md`, a README, or `.d.ts` types, e.g. `node_modules/next/dist/docs/`); the installed source itself; and version-pinned official docs via the **context7** MCP tool or the docs site. If a plan step relies on an API you cannot confirm (even a plausible one), do not implement it on faith: use a verified API or stop and flag it. Honor any project rule that already requires this.
+3. Make the **smallest correct change** that fully resolves the intent, following the plan when present. Match surrounding style and conventions. If reality diverges from the plan, do the correct thing and note the divergence.
+4. Stay in scope: resolve this work-unit, nothing else.
 
 ## 4. Verify
 

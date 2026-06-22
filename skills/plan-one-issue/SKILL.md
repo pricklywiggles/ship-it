@@ -1,7 +1,7 @@
 ---
 name: plan-one-issue
 description: Produce a comprehensive, reviewable implementation plan for a single work-unit before any code is written. Reads the real code (not just locates it), weighs the alternatives, names the existing utilities to reuse, and lays out context, approach, the per-file changes, the key decisions, edge cases, verification, and risks, scaled to the work's complexity. Read-only; emits the plan plus predicted files and a preliminary doc classification. Use for "plan this issue", "draft a plan for FRA-123", "scope and plan this ticket before coding", "what's the approach for this work-unit". The planning stage of the ship-it orchestrator, and usable standalone on an issue or a described task. Not for implementing (use fix-one-issue), batch-shipping many issues (use ship-issues), review (review-and-address), or just listing issues.
-allowed-tools: Bash, Read, Grep, Glob
+allowed-tools: Bash, Read, Grep, Glob, WebFetch, WebSearch, ToolSearch
 ---
 
 # plan-one-issue: a comprehensive, read-only plan for one work-unit
@@ -26,9 +26,10 @@ Load the resolved config via `${CLAUDE_PLUGIN_ROOT}/scripts/load-config.sh`; rea
 This is what separates a real plan from a guess. Do not stop at locating files:
 1. **Read the code the change will touch.** Open the relevant files and understand the actual symbols, signatures, types, and surrounding patterns. If `graphify-out/` exists, query the graph to find the right nodes fast, then read them.
 2. **Find what to reuse.** Identify the existing utilities, hooks, types, and conventions the change should build on rather than reinventing, and name them.
-3. **Weigh the obvious alternatives.** When there is more than one reasonable way, compare them briefly and pick one; record the road not taken when the choice is non-obvious.
-4. If the ticket already carries a plan or acceptance criteria, treat it as the **seed to validate and refine against the real code, never discard it**.
-5. **Note unknowns** that would change the implementation as `openQuestions`. Do not ask here; the orchestrator surfaces them at its checkpoint, and standalone you surface them in the output.
+3. **Verify every external API the plan will rely on, against the installed version. Never propose a package, framework, or platform call from memory.** Training data lags the version this project actually has, and a confidently wrong API (a hallucinated attribute, a renamed option, a signature that changed) is how a whole plan rots. Read the version from `package.json` / the lockfile (or `Cargo.toml`, `go.mod`, ...), then confirm each non-obvious call exists with the signature and behavior you assume, checking: the package's own shipped docs and types in `node_modules` (many now ship a `docs/` folder, an `llms.txt`, an `AGENTS.md`, a README, or `.d.ts` types for exactly this, e.g. `node_modules/next/dist/docs/`); the installed source itself; and version-pinned official docs via the **context7** MCP tool (resolve the library, then query the specific API) or the official docs site. If you cannot confirm a call, do not assert it: mark it in the plan as an assumption to verify during implementation, or choose an API you can confirm. A flagged unknown is fine; a confident hallucination is not.
+4. **Weigh the obvious alternatives.** When there is more than one reasonable way, compare them briefly and pick one; record the road not taken when the choice is non-obvious.
+5. If the ticket already carries a plan or acceptance criteria, treat it as the **seed to validate and refine against the real code, never discard it**.
+6. **Note unknowns** that would change the implementation as `openQuestions`. Do not ask here; the orchestrator surfaces them at its checkpoint, and standalone you surface them in the output.
 
 ## 4. Write the plan
 
@@ -60,7 +61,7 @@ For each `config.docs.jobs`, decide whether the planned change meets its trigger
 ## Guardrails
 
 - Read-only: never edit, commit, push, or create a worktree. Planning only.
-- Ground every step in code you actually read; never plan against a guessed API. Graphify is an accelerator when present, never a requirement.
+- Ground every step in code and docs you actually read; never plan against a guessed API, always verify it against the installed version (step 3). Graphify is an accelerator when present, never a requirement.
 - Right-size: a trivial change gets a tight plan, not ceremony; a real change gets the full reasoning. Match and refine a ticket that already plans well.
 - Honor `houseRules` + `safety` in the plan itself (no em dashes, no AI attribution; carry project rails like code-only verification into the verification section).
 - Non-interactive: surface `openQuestions` in the result; do not block.
