@@ -91,7 +91,7 @@
       { "name": "openspec",     "mechanic": "author-reconcile", "ref": "openspec-propose", "target": "openspec/",     "appliesWhen": "capability" },
       { "name": "design",       "mechanic": "curate-serial",    "ref": "impeccable",       "target": "DESIGN.md",     "appliesWhen": "design" },
       // ARCHITECTURE.md keeper (the parked follow-up): generated curate-serial job, classify per-issue, write once.
-      { "name": "architecture", "mechanic": "curate-serial",    "ref": "ship-it:doc-architecture", "target": "ARCHITECTURE.md", "appliesWhen": "architecture" },
+      { "name": "architecture", "mechanic": "curate-serial",    "ref": "doc-architecture",         "target": "ARCHITECTURE.md", "appliesWhen": "architecture" },
       { "name": "graphify",     "mechanic": "regenerate",       "ref": "graphify update .", "target": "graphify-out/" }
     ]
   },

@@ -72,7 +72,7 @@ Check and report (warn, do not fail):
 
 ## 4. Generate doc-job skills for novel docs
 
-For each doc the user named that has no built-in job, create a **project-local** skill: a directory at `.claude/skills/<name>/SKILL.md` (never a flat `.claude/skills/<name>.md`, which does not load as a skill), in the repo, not in the plugin. It updates that doc by its chosen mechanic from the shipped changes.
+For each doc the user named that has no built-in job, create a **project-local** skill in the repo (not in the plugin) that updates that doc by its chosen mechanic from the shipped changes. **Name it deterministically** so re-runs are idempotent and never strand a differently named folder: the slug is `doc-<topic>`, where `<topic>` is the doc's base filename lowercased and kebab-cased (`ARCHITECTURE.md` -> `doc-architecture`, `docs/RUNBOOK.md` -> `doc-runbook`). Use that one slug everywhere: the directory `.claude/skills/doc-<topic>/SKILL.md` (never a flat `.claude/skills/doc-<topic>.md`, which does not load as a skill), the front-matter `name:`, and the `docs.jobs` `ref` (bare, no `ship-it:` prefix, since it is a project skill).
 
 **Write this `SKILL.md` yourself, now, in this step**, then continue. It is a static file; nothing runs asynchronously and there is nothing to wait for. If you call the **skill-creator** skill for a richer scaffold, understand the Skill tool only *loads its authoring steps into your own context*, it does not spawn a background worker: follow those steps yourself and `Write` the file in this same turn. Never pause waiting for skill-creator (or any invoked skill) to "finish" on its own.
 
@@ -83,7 +83,7 @@ The file must:
 - include a brief project-context section so the skill is grounded in this repo,
 - obey `config.houseRules` in everything it contains, including text the skill prints at runtime: no em dashes (and not `--` as a substitute; use a comma, colon, or rewrite), no AI attribution.
 
-Register it in `docs.jobs` by its bare name (`<name>`). Built-in docs (openspec, graphify, impeccable) need no generation; reference them directly.
+Register it in `docs.jobs` with `ref` set to that same `doc-<topic>` slug. Built-in docs (openspec, graphify, impeccable) need no generation; reference them directly.
 
 ## 5. Write and validate ship-it.config
 
@@ -100,6 +100,8 @@ Write the config to **`.claude/ship-it/config.json`** (ship-it's project home, b
 - `prTemplate`: `{ sections, verification }`.
 
 **Then validate in a loop.** Run `${CLAUDE_PLUGIN_ROOT}/scripts/validate-config.sh <path>` and fix every error it reports, re-running until it prints `OK`. The validator (schema in `scripts/config.schema.jq`) is the schema of record; the config is not done until it passes. Resolve warnings too, or note why not. Then show the user the final, validated config.
+
+**Then verify the artifacts on disk.** Run `${CLAUDE_PLUGIN_ROOT}/scripts/verify-init.sh <slug>...`, passing the `doc-<topic>` slug of every skill you generated this run (no args if every doc used a built-in). It confirms the config is present and valid, the worktree prepare script exists and is executable, and each generated skill is a real `.claude/skills/<slug>/SKILL.md` whose top-level `name` and `docs.jobs` `ref` equal the slug with a top-level `allowed-tools`; it warns on empty or orphan skill dirs. Fix every `FAIL` before finishing.
 
 ## 6. Summary
 

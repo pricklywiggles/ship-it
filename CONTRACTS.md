@@ -141,7 +141,7 @@ The authoritative shape is `scripts/config.schema.jq`; `scripts/validate-config.
 
 ## init
 
-Detect-first, ask-second. Detects package manager, verify command, CI system, tracker, doc tools, and installed reviewers from the repo; asks only for what it cannot infer (tracker project/team, safety rails, which doc jobs + reviewers, merge strategy); generates doc-job skills for novel docs via skill-creator; runs a prerequisite + auth check (tracker MCP, gh, doc-tool binaries); writes `ship-it.config`, then validates it against the schema (`scripts/config.schema.jq`) via `scripts/validate-config.sh` in an edit-fix loop until it conforms, so init's output always matches the shapes the engine reads. All interactivity lives here, so the workers stay parallel and non-interactive.
+Detect-first, ask-second. Detects package manager, verify command, CI system, tracker, doc tools, and installed reviewers from the repo; asks only for what it cannot infer (tracker project/team, safety rails, which doc jobs + reviewers, merge strategy); generates doc-job skills for novel docs via skill-creator; runs a prerequisite + auth check (tracker MCP, gh, doc-tool binaries); writes `ship-it.config`, then validates it against the schema (`scripts/config.schema.jq`) via `scripts/validate-config.sh` in an edit-fix loop until it conforms, so init's output always matches the shapes the engine reads, then verifies the artifacts on disk (`scripts/verify-init.sh`: config present and valid, prepare script present and executable, each generated doc-job skill correctly named and placed). All interactivity lives here, so the workers stay parallel and non-interactive.
 
 ## Plugin packaging notes
 
