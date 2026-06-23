@@ -1,7 +1,7 @@
 {
   "name": "ship-it",
   "description": "Ship your work end to end: drive a batch of issues or your current local changes through implement, review, comment cleanup, and PR; keep living docs in sync. A configurable orchestrator plus standalone skills. Run init to adapt it to your project.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": {
     "name": "Gustavo Gallegos",
     "email": "goose@fractal.ly"
