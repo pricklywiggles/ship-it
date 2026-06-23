@@ -97,6 +97,7 @@
       </a>
       <div class="hidden items-center gap-7 text-[13px] text-zinc-400 lg:flex">
         <a href="#model" class="hover:text-zinc-100">Model</a>
+        <a href="#start" class="hover:text-zinc-100">Get started</a>
         <a href="#pipeline" class="hover:text-zinc-100">Pipeline</a>
         <a href="#planning" class="hover:text-zinc-100">Planning</a>
         <a href="#skills" class="hover:text-zinc-100">Skills</a>
@@ -182,6 +183,53 @@
           <p class="mt-3 text-center font-mono text-[11px] text-zinc-600">one prompt &middot; two issues &middot; two reviewed PRs</p>
         </div>
       </div>
+    </section>
+
+    <!-- ===================== GET STARTED ===================== -->
+    <section id="start" class="mx-auto max-w-[1400px] px-5 py-24 md:py-32">
+      <div class="reveal max-w-[60ch]">
+        <p class="font-mono text-xs uppercase tracking-[0.2em] text-accent">Get started</p>
+        <h2 class="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 md:text-4xl">Three steps to your first batch</h2>
+      </div>
+
+      <div class="mt-14 space-y-px overflow-hidden rounded-2xl border border-white/10" data-stagger>
+        <!-- step 1 -->
+        <div class="grid grid-cols-1 gap-5 bg-zinc-900/30 p-7 md:grid-cols-[auto_1fr_1.2fr] md:items-center md:gap-10 md:p-9">
+          <span class="font-mono text-4xl font-light text-zinc-700">01</span>
+          <div>
+            <h3 class="text-lg font-medium text-zinc-100">Install the plugin</h3>
+            <p class="mt-2 max-w-[40ch] text-sm leading-relaxed text-zinc-400">Add the marketplace, then enable ship-it. Refresh the marketplace clone first to get the latest version.</p>
+          </div>
+          <pre class="overflow-x-auto rounded-lg border border-white/10 bg-zinc-950/60 p-4 font-mono text-[11.5px] leading-relaxed text-zinc-300"><span class="text-accent">$</span> claude plugin marketplace add pricklywiggles/ship-it
+<span class="text-accent">$</span> claude plugin install ship-it@pricklywiggles</pre>
+        </div>
+        <!-- step 2 -->
+        <div class="grid grid-cols-1 gap-5 bg-zinc-900/30 p-7 md:grid-cols-[auto_1fr_1.2fr] md:items-center md:gap-10 md:p-9">
+          <span class="font-mono text-4xl font-light text-zinc-700">02</span>
+          <div>
+            <h3 class="text-lg font-medium text-zinc-100">Adapt it to your project</h3>
+            <p class="mt-2 max-w-[40ch] text-sm leading-relaxed text-zinc-400">Run init. It detects what it can, asks only the gaps, writes <span class="font-mono text-zinc-300">.claude/ship-it/config.json</span>, and self-verifies on disk.</p>
+          </div>
+          <pre class="overflow-x-auto rounded-lg border border-white/10 bg-zinc-950/60 p-4 font-mono text-[11.5px] leading-relaxed text-zinc-300"><span class="text-accent">&gt;</span> /ship-it:init
+
+  detect &middot; interview &middot; write config
+  validate &middot; verify-init <span class="text-accent">OK</span></pre>
+        </div>
+        <!-- step 3 -->
+        <div class="grid grid-cols-1 gap-5 bg-zinc-900/30 p-7 md:grid-cols-[auto_1fr_1.2fr] md:items-center md:gap-10 md:p-9">
+          <span class="font-mono text-4xl font-light text-accent">03</span>
+          <div>
+            <h3 class="text-lg font-medium text-zinc-100">Ship</h3>
+            <p class="mt-2 max-w-[40ch] text-sm leading-relaxed text-zinc-400">Run a batch, or any stage skill standalone. Review at the checkpoint, then approve. Each PR carries a followable QA checklist.</p>
+          </div>
+          <pre class="overflow-x-auto rounded-lg border border-accent/20 bg-accent/[0.05] p-4 font-mono text-[11.5px] leading-relaxed text-zinc-300"><span class="text-accent">&gt;</span> ship all the todo issues
+
+  <span class="text-zinc-500">// after merge</span>
+<span class="text-accent">$</span> scripts/cleanup-worktrees.sh --all-merged</pre>
+        </div>
+      </div>
+
+      <p class="reveal mt-8 max-w-[60ch] text-sm leading-relaxed text-zinc-500">For development, point Claude at the live repo with <span class="font-mono text-zinc-300">--plugin-dir</span> to skip the install dance entirely.</p>
     </section>
 
     <!-- ===================== MENTAL MODEL ===================== -->
@@ -576,53 +624,6 @@
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- ===================== GET STARTED ===================== -->
-    <section id="start" class="mx-auto max-w-[1400px] px-5 py-24 md:py-32">
-      <div class="reveal max-w-[60ch]">
-        <p class="font-mono text-xs uppercase tracking-[0.2em] text-accent">Get started</p>
-        <h2 class="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 md:text-4xl">Three steps to your first batch</h2>
-      </div>
-
-      <div class="mt-14 space-y-px overflow-hidden rounded-2xl border border-white/10" data-stagger>
-        <!-- step 1 -->
-        <div class="grid grid-cols-1 gap-5 bg-zinc-900/30 p-7 md:grid-cols-[auto_1fr_1.2fr] md:items-center md:gap-10 md:p-9">
-          <span class="font-mono text-4xl font-light text-zinc-700">01</span>
-          <div>
-            <h3 class="text-lg font-medium text-zinc-100">Install the plugin</h3>
-            <p class="mt-2 max-w-[40ch] text-sm leading-relaxed text-zinc-400">Add the marketplace, then enable ship-it. Refresh the marketplace clone first to get the latest version.</p>
-          </div>
-          <pre class="overflow-x-auto rounded-lg border border-white/10 bg-zinc-950/60 p-4 font-mono text-[11.5px] leading-relaxed text-zinc-300"><span class="text-accent">$</span> claude plugin marketplace add pricklywiggles/ship-it
-<span class="text-accent">$</span> claude plugin install ship-it@pricklywiggles</pre>
-        </div>
-        <!-- step 2 -->
-        <div class="grid grid-cols-1 gap-5 bg-zinc-900/30 p-7 md:grid-cols-[auto_1fr_1.2fr] md:items-center md:gap-10 md:p-9">
-          <span class="font-mono text-4xl font-light text-zinc-700">02</span>
-          <div>
-            <h3 class="text-lg font-medium text-zinc-100">Adapt it to your project</h3>
-            <p class="mt-2 max-w-[40ch] text-sm leading-relaxed text-zinc-400">Run init. It detects what it can, asks only the gaps, writes <span class="font-mono text-zinc-300">.claude/ship-it/config.json</span>, and self-verifies on disk.</p>
-          </div>
-          <pre class="overflow-x-auto rounded-lg border border-white/10 bg-zinc-950/60 p-4 font-mono text-[11.5px] leading-relaxed text-zinc-300"><span class="text-accent">&gt;</span> /ship-it:init
-
-  detect &middot; interview &middot; write config
-  validate &middot; verify-init <span class="text-accent">OK</span></pre>
-        </div>
-        <!-- step 3 -->
-        <div class="grid grid-cols-1 gap-5 bg-zinc-900/30 p-7 md:grid-cols-[auto_1fr_1.2fr] md:items-center md:gap-10 md:p-9">
-          <span class="font-mono text-4xl font-light text-accent">03</span>
-          <div>
-            <h3 class="text-lg font-medium text-zinc-100">Ship</h3>
-            <p class="mt-2 max-w-[40ch] text-sm leading-relaxed text-zinc-400">Run a batch, or any stage skill standalone. Review at the checkpoint, then approve. Each PR carries a followable QA checklist.</p>
-          </div>
-          <pre class="overflow-x-auto rounded-lg border border-accent/20 bg-accent/[0.05] p-4 font-mono text-[11.5px] leading-relaxed text-zinc-300"><span class="text-accent">&gt;</span> ship all the todo issues
-
-  <span class="text-zinc-500">// after merge</span>
-<span class="text-accent">$</span> scripts/cleanup-worktrees.sh --all-merged</pre>
-        </div>
-      </div>
-
-      <p class="reveal mt-8 max-w-[60ch] text-sm leading-relaxed text-zinc-500">For development, point Claude at the live repo with <span class="font-mono text-zinc-300">--plugin-dir</span> to skip the install dance entirely.</p>
     </section>
 
     <!-- ===================== FOOTER ===================== -->
