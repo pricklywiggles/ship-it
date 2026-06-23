@@ -44,12 +44,13 @@ If `config.worktree.enabled`, create each lane head's worktree under `config.wor
 
 ## Phase 5: Run the batch
 
-Adapt the Workflow template in `references/workflow.md` (fill in the resolved lanes, the path to `ship-it.config`, and `config.concurrency.maxLanes` as the lane-concurrency cap), then launch it with the **Workflow** tool. Per work-unit the pipeline chains the stage skills (it never reimplements them):
+Adapt the Workflow template in `references/workflow.md` (fill in the resolved lanes, the path to `ship-it.config`, `config.concurrency.maxLanes` as the lane-concurrency cap, and the **author-reconcile** entries of `config.docs.jobs` so their artifacts are authored on-branch and ride the PR), then launch it with the **Workflow** tool. Per work-unit the pipeline chains the stage skills (it never reimplements them):
 
 1. **`ship-it:fix-one-issue`** (creating the worktree first if a stacked child), implementing against the work-unit's `plan` when present (a stacked child first reconciles its plan with the parent's changes already on its base), then commit. Returns `addedComments` and `docNeed`.
 2. **`ship-it:comment-cleanup`** in apply mode, scoped to the work-unit's commit range, only if `addedComments`. Code-modifying, so sequential within a lane; concurrent across lanes.
 3. **`ship-it:review-and-address`** over the work-unit's diff (fans out `config.review.reviewers`, merges findings, applies warranted per `config.review.applyWarranted`).
-4. **`ship-it:open-pr`**: push the branch and open a PR per `config.prTemplate` (base `main` for a lane head, the parent branch for a stacked child; GitHub auto-retargets a stacked PR to main when its parent merges).
+4. **Author-reconcile docs**, only when a `config.docs.jobs` entry with mechanic `author-reconcile` matches the work-unit's `docNeed`: author the artifact on-branch by invoking the job's `ref` (e.g. `openspec-propose`) and commit it, so it **rides the PR** rather than being bolted on later. See `references/doc-jobs.md`.
+5. **`ship-it:open-pr`**: push the branch and open a PR per `config.prTemplate` (base `main` for a lane head, the parent branch for a stacked child; GitHub auto-retargets a stacked PR to main when its parent merges).
 
 Each result carries `docNeed` (the doc jobs it triggers) for Phase 6.
 
@@ -57,7 +58,7 @@ Each result carries `docNeed` (the doc jobs it triggers) for Phase 6.
 
 **Skip this entire phase if a skip-docs token was in the trigger**, or if `config.docs.enabled` is false. Otherwise read `references/doc-jobs.md` for the mechanics and built-in jobs. After the Workflow returns, run the doc phase: for each job in `config.docs.jobs`, run the ones whose trigger (`appliesWhen`) matched a shipped work-unit, in parallel (each owns a different file). By mechanic:
 - **regenerate**: deferred to Phase 7 (post-merge), because the doc is re-derived from the merged code, not the pre-merge base. Do not run it here.
-- **author-reconcile**: the per-work-unit artifact was authored on its branch during the run (or author it now); reconcile into canonical docs post-merge (Phase 7).
+- **author-reconcile**: the per-work-unit artifact was already authored on its branch in Phase 5 (it rides the PR); only the reconcile into canonical docs is deferred to post-merge (Phase 7).
 - **curate-serial**: update the shared prose doc once, serially (e.g. `impeccable` for DESIGN.md). If several work-units are visual, one consolidated pass.
 
 Skip jobs with no matching change. Do not over-document.

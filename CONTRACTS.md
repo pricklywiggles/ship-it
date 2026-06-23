@@ -114,7 +114,7 @@ Built-in jobs: `graphify` (regenerate), `openspec` (author-reconcile), `impeccab
 ## Orchestrators
 
 ### ship-issues (batch)
-`resolve work-units (source)` -> `plan each (concurrent Plan agents, read-only)` -> `post proposals` -> `group into lanes (overlap graph)` -> `checkpoint` (review on tracker or terminal; update on feedback, finalize on approval) -> Workflow fan-out, per work-unit: `fix-one-issue` (against the plan) -> `comment-cleanup` (if comments changed) -> `review-and-address` (apply warranted) -> `open-pr` (push, open PR) -> `doc phase` (curate-serial writes now; author-reconcile + regenerate deferred) -> post-PR watchers (CI fan-out per PR; merge watcher then archive + regenerate). Lanes concurrent; stacked within a lane.
+`resolve work-units (source)` -> `plan each (concurrent Plan agents, read-only)` -> `post proposals` -> `group into lanes (overlap graph)` -> `checkpoint` (review on tracker or terminal; update on feedback, finalize on approval) -> Workflow fan-out, per work-unit: `fix-one-issue` (against the plan) -> `comment-cleanup` (if comments changed) -> `review-and-address` (apply warranted) -> `author-reconcile docs` (on-branch, ride the PR) -> `open-pr` (push, open PR) -> `doc phase` (curate-serial writes now; author-reconcile archive + regenerate deferred post-merge) -> post-PR watchers (CI fan-out per PR; merge watcher then archive + regenerate). Lanes concurrent; stacked within a lane.
 
 ## ship-it.config keys
 

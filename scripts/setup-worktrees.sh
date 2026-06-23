@@ -48,6 +48,14 @@ while IFS='|' read -r id branch base; do
     # Prepare runs IN the worktree so a plain install lands there; {wt}/{main} are
     # still substituted for prepare commands that need the explicit paths.
     ( cd "$wt" && eval "$cmd" )
+    # Keep prepare's artifacts out of git's view so they never surface as untracked and
+    # leak into a feature diff. The worktree is fresh off a clean base, so anything
+    # untracked after prepare is prepare's doing (linked sidecars, generated files).
+    excl="$(git -C "$MAIN" rev-parse --git-path info/exclude)"
+    while IFS= read -r p; do
+      [ -n "$p" ] || continue
+      grep -qxF "/$p" "$excl" 2>/dev/null || printf '/%s\n' "$p" >>"$excl"
+    done < <(git -C "$wt" ls-files --others --exclude-standard)
   fi
   echo "ready: $wt -> $(git -C "$wt" rev-parse --abbrev-ref HEAD)"
 done

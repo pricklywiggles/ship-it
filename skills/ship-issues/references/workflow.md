@@ -18,7 +18,7 @@ Common case: every work-unit is in a different area, so every lane has one item 
 
 ## 2. The Workflow script
 
-Adapt the template: pass `args = { main, repo, configPath, lanes, maxLanes }`, where `configPath` points at the project's `ship-it.config`, `maxLanes` is `config.concurrency.maxLanes` (the cap on how many lanes run at once), and each work-unit object is `{ id, title, desc, branch, base, prBase, wt, url, focus, plan }` (`focus` is the scoped approach + predicted files from Phase 2; `plan` is the approved plan from the Phase 2 plan pass, present when `config.planning.enabled`). Launch with the **Workflow** tool. At most `maxLanes` lanes run concurrently (a worker pool over lanes); within a lane the items run as an awaited sequential loop, so issues stacked in a lane stay sequential.
+Adapt the template: pass `args = { main, repo, configPath, lanes, maxLanes, docJobs }`, where `configPath` points at the project's `ship-it.config`, `maxLanes` is `config.concurrency.maxLanes` (the cap on how many lanes run at once), `docJobs` is the **author-reconcile** entries of `config.docs.jobs` (authored on-branch so they ride the PR), and each work-unit object is `{ id, title, desc, branch, base, prBase, wt, url, focus, plan }` (`focus` is the scoped approach + predicted files from Phase 2; `plan` is the approved plan from the Phase 2 plan pass, present when `config.planning.enabled`). Launch with the **Workflow** tool. At most `maxLanes` lanes run concurrently (a worker pool over lanes); within a lane the items run as an awaited sequential loop, so issues stacked in a lane stay sequential.
 
 The per-work-unit pipeline **invokes the ship-it stage skills**; it does not reimplement them. The stage skills read `ship-it.config` themselves, so the agent prompts are thin wrappers that hand over the work-unit and the config path.
 
@@ -26,10 +26,10 @@ The per-work-unit pipeline **invokes the ship-it stage skills**; it does not rei
 export const meta = {
   name: 'ship-it-batch',
   description: 'Ship a batch of work-units: implement, comment-cleanup, review and address, push and PR; lanes concurrent, stacked within a lane',
-  phases: [{ title: 'Implement' }, { title: 'Comments' }, { title: 'Review' }, { title: 'Finalize' }],
+  phases: [{ title: 'Implement' }, { title: 'Comments' }, { title: 'Review' }, { title: 'Docs' }, { title: 'Finalize' }],
 }
 
-const { main, repo, configPath, lanes, maxLanes } = args
+const { main, repo, configPath, lanes, maxLanes, docJobs } = args
 
 const IMPL_SCHEMA = {
   type: 'object', additionalProperties: false,
@@ -85,6 +85,11 @@ async function runIssue(issue) {
   }
   const review = await agent(invoke('ship-it:review-and-address', issue, `Review the diff ${issue.base}...HEAD. Apply warranted per config.review.applyWarranted. Commit, do not push.`),
     { label: `review:${issue.id}`, phase: 'Review', schema: REVIEW_SCHEMA })
+  // author-reconcile docs on-branch BEFORE open-pr, so the artifact rides the original push (references/doc-jobs.md).
+  for (const job of (docJobs || []).filter((j) => j.mechanic === 'author-reconcile' && (impl.docNeed || []).includes(j.appliesWhen))) {
+    await agent(`In ${issue.wt}, author the "${job.name}" doc artifact for this work-unit by invoking ${job.ref} over the diff ${issue.base}...HEAD, then commit it on ${issue.branch} (do not push). It must ride this PR.`,
+      { label: `doc:${job.name}:${issue.id}`, phase: 'Docs' })
+  }
   const fin = await agent(invoke('ship-it:open-pr', issue, `Push ${issue.branch} to ${repo} and open its PR with base ${issue.prBase}. Build the body from config.prTemplate (two-part Verification).`),
     { label: `pr:${issue.id}`, phase: 'Finalize', schema: FINAL_SCHEMA })
   return { ...fin, docNeed: impl.docNeed, docRationale: impl.docRationale, addedComments: impl.addedComments, review }
