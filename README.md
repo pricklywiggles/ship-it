@@ -32,7 +32,7 @@ Install them:
 /plugin install stack-it@fractally-claude-marketplace
 ```
 
-The `@fractally-claude-marketplace` suffix is the marketplace's name (from [`marketplace.json`](.claude-plugin/marketplace.json)), not the repo name. Each plugin's skills auto-activate when Claude judges them relevant, or you can invoke one explicitly as `/<plugin>:<skill>` (e.g. `/ship-it:init`, `/stack-it:setup-stack`). ship-it also has a full manual at **[pricklywiggles.github.io/fractally-claude-marketplace](https://pricklywiggles.github.io/fractally-claude-marketplace/)**.
+The `@fractally-claude-marketplace` suffix is the marketplace's name (from [`marketplace.json`](.claude-plugin/marketplace.json)), not the repo name. Each plugin's skills auto-activate when Claude judges them relevant, or you can invoke one explicitly as `/<plugin>:<skill>` (e.g. `/ship-it:init`, `/stack-it:setup-stack`). Both plugins have a full web manual: the marketplace site at **[pricklywiggles.github.io/fractally-claude-marketplace](https://pricklywiggles.github.io/fractally-claude-marketplace/)** links out to the [ship-it](https://pricklywiggles.github.io/fractally-claude-marketplace/ship-it.html) and [stack-it](https://pricklywiggles.github.io/fractally-claude-marketplace/stack-it.html) manuals.
 
 ## Team setup (no prompts)
 

@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>stack-it: the manual</title>
+  <meta name="description" content="stack-it: your stack is the foundation of every project. Go from an empty folder to a fully set-up, version-pinned, security-vetted, documented tech stack, with options and guidance at every step and the pesky install and compatibility issues handled for you. The manual for v0.1.0." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@200;300;400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+  <style type="text/tailwindcss">
+     @theme {
+       --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+       --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, monospace;
+       --color-accent: oklch(0.72 0.16 168);
+       --color-accent-dim: oklch(0.55 0.12 168);
+       --color-ink: oklch(0.16 0.005 285);
+       --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+
+       /* teal-tinted neutrals: harmonize with accent instead of dead zinc */
+       --color-heading: oklch(0.94 0.01 168);
+       --color-body: oklch(0.72 0.01 168);
+       --color-muted: oklch(0.55 0.01 168);
+       --color-disabled: oklch(0.42 0.01 168);
+       --color-surface: oklch(0.17 0.01 168);
+       --color-border-subtle: oklch(1 0 0 / 0.08);
+     }
+   </style>
+
+  <style>
+    :root { color-scheme: dark; }
+    html { scroll-behavior: smooth; }
+    body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    ::selection { background: oklch(0.72 0.16 168 / 0.3); color: #fff; }
+
+    /* Slim custom scrollbar */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #09090b; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 99px; border: 3px solid #09090b; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+    /* Fixed grain overlay: never on a scrolling container (perf) */
+    .grain::before {
+      content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Disable grain on small mobile (reduces repaint stress) */
+    @media (max-width: 640px) {
+      .grain::before { display: none; }
+    }
+
+    /* Aurora mesh, slow drift, behind the hero only */
+    @keyframes drift { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(4%,-3%,0) scale(1.08); } }
+    .aurora { filter: blur(72px); animation: drift 18s ease-in-out infinite; will-change: transform; }
+
+    /* Section kicker: shared pattern with intentional variation */
+    .kicker { font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, monospace; text-transform: uppercase; letter-spacing: 0.2em; }
+
+    /* Breathing status pulse */
+    @keyframes ping2 { 0% { transform: scale(0.8); opacity: 0.6; } 75%,100% { transform: scale(2.2); opacity: 0; } }
+    .pulse-ring { animation: ping2 2.6s cubic-bezier(0,0,0.2,1) infinite; }
+
+    /* Scroll-down hint */
+    @keyframes scrollhint { 0%,100% { transform: translateY(0); opacity: 0.6; } 50% { transform: translateY(5px); opacity: 1; } }
+    .scroll-hint svg { animation: scrollhint 1.8s var(--ease-fluid) infinite; }
+
+    /* Stack-layer hover lift */
+    .layer { transition: transform .3s var(--ease-fluid), border-color .3s var(--ease-fluid); }
+    .stack:hover .layer { border-color: oklch(1 0 0 / 0.14); }
+    .layer:hover { transform: translateX(4px); }
+
+    a, button { transition: color .25s var(--ease-fluid), background-color .25s var(--ease-fluid), border-color .25s var(--ease-fluid), transform .25s var(--ease-fluid); }
+    .tap:active { transform: translateY(1px) scale(0.985); }
+
+    /* Diagram defaults: GSAP overwrites stroke offset on scroll */
+    .diagram .draw { stroke-linecap: round; stroke-linejoin: round; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .aurora, .pulse-ring, .scroll-hint svg { animation: none !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+
+<body class="grain bg-zinc-950 font-sans text-body antialiased selection:text-white">
+
+  <!-- scroll progress -->
+  <div class="fixed inset-x-0 top-0 z-[70] h-px bg-zinc-800">
+    <div id="progress" class="h-full origin-left scale-x-0 bg-accent shadow-[0_0_12px_oklch(0.72_0.16_168/0.5)]"></div>
+  </div>
+
+  <!-- nav -->
+  <header class="fixed inset-x-0 top-0 z-50">
+    <nav class="mx-auto mt-3 flex max-w-[1400px] items-center justify-between rounded-2xl border border-border-subtle bg-zinc-950/80 px-4 py-2.5 backdrop-blur-xl sm:px-5">
+      <a href="index.html" class="flex items-center gap-2.5 tap" aria-label="fractally marketplace home">
+        <span class="grid h-7 w-7 place-items-center rounded-lg border border-accent/30 bg-accent/10">
+          <svg viewBox="0 0 24 24" class="h-4 w-4 text-accent" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><rect x="7.75" y="7.75" width="8.5" height="8.5" rx="2.5" stroke-opacity="0.55"/><rect x="10.75" y="10.75" width="2.5" height="2.5" rx="0.8" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="font-mono text-sm font-medium tracking-tight text-heading">fractally</span>
+        <span class="hidden items-center gap-2 sm:flex">
+          <span class="text-disabled">/</span>
+          <span class="font-mono text-sm text-body">stack-it</span>
+          <span class="rounded-md border border-border-subtle px-1.5 py-0.5 font-mono text-[10px] text-muted">v0.1.0</span>
+        </span>
+      </a>
+      <div class="hidden items-center gap-7 text-[13px] text-body lg:flex">
+        <a href="#why" class="hover:text-heading">Why</a>
+        <a href="#how" class="hover:text-heading">How it works</a>
+        <a href="#options" class="hover:text-heading">Options</a>
+        <a href="#safeguards" class="hover:text-heading">Safeguards</a>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="hidden items-center gap-0.5 rounded-lg border border-border-subtle p-0.5 font-mono text-xs sm:flex" role="group" aria-label="Switch plugin">
+          <a href="ship-it.html" class="rounded-md px-2.5 py-1 text-muted hover:text-heading">ship-it</a>
+          <a href="stack-it.html" aria-current="page" class="rounded-md bg-accent/10 px-2.5 py-1 text-accent">stack-it</a>
+        </div>
+        <a href="https://github.com/pricklywiggles/fractally-claude-marketplace" target="_blank" rel="noopener noreferrer" aria-label="fractally on GitHub" class="tap grid h-8 w-8 place-items-center rounded-lg border border-border-subtle text-body hover:border-white/15 hover:text-heading">
+          <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        </a>
+        <a href="#start" class="tap rounded-xl border border-accent/30 bg-accent/10 px-3.5 py-1.5 font-mono text-xs text-accent hover:bg-accent/20">get started</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top" class="relative">
+
+    <!-- ===================== HERO ===================== -->
+    <section class="relative min-h-[100dvh] overflow-hidden">
+      <div class="pointer-events-none absolute inset-0 -z-10">
+        <div class="aurora absolute -left-48 top-0 h-[50rem] w-[50rem] rounded-full bg-accent/[0.12]"></div>
+        <div class="aurora absolute -right-20 top-72 h-[40rem] w-[40rem] rounded-full bg-emerald-500/8" style="animation-delay:-6s"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(70%_55%_at_50%_0%,transparent,#09090b_80%)]"></div>
+        <div class="absolute inset-0 opacity-[0.22] [background-image:linear-gradient(to_right,#3f3f46_1px,transparent_1px),linear-gradient(to_bottom,#3f3f46_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(50%_45%_at_50%_30%,#000,transparent)]"></div>
+      </div>
+
+      <div class="mx-auto grid max-w-[1400px] grid-cols-1 items-center gap-10 px-5 pb-20 pt-36 lg:grid-cols-[1.05fr_0.95fr] lg:pt-40">
+        <div>
+          <div class="reveal mb-8 font-mono text-[13px] font-medium tracking-[0.25em] uppercase text-accent/80">the stack-it plugin</div>
+
+          <h1 class="reveal text-balance font-black leading-[0.95] tracking-[-0.035em] text-heading text-4xl sm:text-6xl sm:leading-[0.92] md:text-7xl lg:text-[5.25rem]">
+            hit the ground<br class="hidden sm:block" />
+            <span class="text-accent"> running</span>.
+            <span class="block text-2xl font-light tracking-tight text-muted sm:text-3xl md:text-4xl lg:text-[2.75rem] mt-3 md:mt-4">your stack is the foundation.</span>
+          </h1>
+
+          <p class="reveal mt-8 max-w-[54ch] text-pretty text-sm leading-relaxed text-body md:text-base">
+            From the database to the framework to the test tooling, every choice in your stack shapes your developer experience, your performance, and your results. <span class="font-mono text-zinc-200">stack-it</span> takes you from an empty folder to a fully set-up stack, giving you options and guidance at every step and quietly handling the pesky install issues and incompatible choices along the way.
+          </p>
+
+          <div class="reveal mt-9 flex flex-wrap items-center gap-3">
+            <a href="#start" class="tap group inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3.5 font-mono text-sm font-semibold text-ink hover:bg-accent/90">
+              get started
+              <svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a href="#how" class="tap inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-3.5 font-mono text-sm text-zinc-300 hover:border-white/20 hover:text-heading">see how it works</a>
+          </div>
+
+          <div class="reveal mt-10 flex flex-wrap gap-x-7 gap-y-2.5 font-mono text-[11px] text-disabled">
+            <span><span class="text-zinc-300">6</span>&nbsp; guided skills</span>
+            <span><span class="text-zinc-300">version</span>&nbsp; pinned</span>
+            <span><span class="text-zinc-300">security</span>&nbsp; vetted</span>
+            <span><span class="text-zinc-300">proven</span>&nbsp; green</span>
+          </div>
+        </div>
+
+        <!-- right: the stack, assembled (the product, made literal) -->
+        <div class="reveal lg:translate-y-2">
+          <div class="stack overflow-hidden rounded-2xl border border-border-subtle bg-surface/40 p-5 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.8)] backdrop-blur-sm sm:p-6">
+            <div class="mb-4 flex items-center justify-between">
+              <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-disabled">empty folder &rarr; your stack</span>
+              <span class="rounded-md border border-border-subtle px-2 py-0.5 font-mono text-[10px] text-muted">editorial site</span>
+            </div>
+            <div class="space-y-1.5" data-stagger>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">e2e</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Playwright <span class="text-disabled">1.61.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Cypress <span class="text-disabled">14.5.1</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">WebdriverIO <span class="text-disabled">9.21.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">unit tests</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Vitest <span class="text-disabled">4.1.9</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Jest <span class="text-disabled">30.1.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Mocha <span class="text-disabled">11.7.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">format</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Prettier <span class="text-disabled">3.8.4</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Biome <span class="text-disabled">2.3.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">dprint <span class="text-disabled">0.49.1</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">lint</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">ESLint <span class="text-disabled">10.5.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Biome <span class="text-disabled">2.3.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">oxlint <span class="text-disabled">1.20.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">images</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">sharp <span class="text-disabled">0.35.2</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Jimp <span class="text-disabled">1.6.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">unpic <span class="text-disabled">1.0.1</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">CMS</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Sanity <span class="text-disabled">6.2.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Payload <span class="text-disabled">3.40.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Strapi <span class="text-disabled">5.10.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">3D / WebGL</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">React Three Fiber <span class="text-disabled">9.6.1</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Three.js <span class="text-disabled">0.184.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Babylon.js <span class="text-disabled">8.12.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">motion</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Motion <span class="text-disabled">12.41.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">GSAP <span class="text-disabled">3.13.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">anime.js <span class="text-disabled">4.1.3</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">styling</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Tailwind CSS <span class="text-disabled">4.3.1</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Panda CSS <span class="text-disabled">0.55.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">vanilla-extract <span class="text-disabled">1.18.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">UI</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">React <span class="text-disabled">19.2.7</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Svelte <span class="text-disabled">5.40.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Vue <span class="text-disabled">3.6.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">framework</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Next.js <span class="text-disabled">16.2.9</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Astro <span class="text-disabled">5.14.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">SvelteKit <span class="text-disabled">2.30.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">language</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">TypeScript <span class="text-disabled">6.0.3</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">JavaScript <span class="text-disabled">ES2024</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-white/[0.02] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-muted">package</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">pnpm <span class="text-disabled">11.9.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Bun <span class="text-disabled">1.2.21</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">npm <span class="text-disabled">11.6.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+              <div class="layer flex items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent/[0.06] px-3.5 py-2">
+                <span class="font-mono text-[11px] text-accent-dim">runtime &middot; foundation</span>
+                <span class="cycle inline-block h-[18px] overflow-hidden align-middle font-mono text-[11.5px]"><span class="reel flex flex-col items-end will-change-transform"><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-100">Node.js <span class="text-accent-dim">24.18.0</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Bun <span class="text-disabled">1.2.21</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="opt flex h-[18px] items-center gap-1.5 whitespace-nowrap text-zinc-200">Deno <span class="text-disabled">2.5.3</span> <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></span>
+              </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2 border-t border-border-subtle pt-4 font-mono text-[11px] text-muted">
+              <span class="relative flex h-1.5 w-1.5"><span class="pulse-ring absolute inline-flex h-full w-full rounded-full bg-accent"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent"></span></span>
+              vetted &middot; pinned &middot; built green &middot; shipped to Vercel
+            </div>
+          </div>
+        </div>
+      </div>
+      <a href="#why" class="scroll-hint group absolute bottom-7 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-1.5 text-muted hover:text-accent sm:flex" aria-label="Scroll to content">
+        <span class="font-mono text-[10px] uppercase tracking-[0.2em]">scroll</span>
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </section>
+
+    <!-- ===================== WHY ===================== -->
+    <section id="why" class="mx-auto max-w-[1400px] px-5 py-20 md:py-28">
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
+        <div class="reveal lg:sticky lg:top-28 lg:self-start">
+          <div class="kicker text-[11px] text-accent/70">why it's hard</div>
+          <h2 class="mt-3 text-4xl font-bold tracking-tight text-heading md:text-5xl lg:text-[3.2rem]">the first decisions are the heaviest</h2>
+          <p class="mt-5 max-w-[50ch] leading-relaxed text-body">Everything you build stands on the stack you pick first. Get it right and the project flows; get it wrong and you feel the drag for months. But "getting it right" means clearing a gauntlet, before you've written a line of real code.</p>
+        </div>
+
+        <div class="reveal divide-y divide-accent/[0.06] border-y border-border-subtle">
+          <div class="grid grid-cols-[auto_1fr] gap-5 py-6">
+            <span class="font-mono text-sm text-accent-dim">01</span>
+            <div>
+              <h3 class="font-mono text-base tracking-tight text-heading">decision overload</h3>
+              <p class="mt-1.5 text-sm leading-relaxed text-body">Framework, database, ORM, test runner, linter, bundler, and a dozen more. Every slot is a fork, and they interact.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-[auto_1fr] gap-5 py-6">
+            <span class="font-mono text-sm text-accent-dim">02</span>
+            <div>
+              <h3 class="font-mono text-base tracking-tight text-heading">version churn</h3>
+              <p class="mt-1.5 text-sm leading-relaxed text-body">Last project's versions are already stale, and maybe there's a new framework you've been meaning to try. What's current, and is it actually stable yet?</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-[auto_1fr] gap-5 py-6">
+            <span class="font-mono text-sm text-accent-dim">03</span>
+            <div>
+              <h3 class="font-mono text-base tracking-tight text-heading">compatibility traps</h3>
+              <p class="mt-1.5 text-sm leading-relaxed text-body">Two perfectly reasonable picks that simply will not run together, discovered three installs deep, after you've committed to both.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-[auto_1fr] gap-5 py-6">
+            <span class="font-mono text-sm text-accent-dim">04</span>
+            <div>
+              <h3 class="font-mono text-base tracking-tight text-heading">setup papercuts</h3>
+              <p class="mt-1.5 text-sm leading-relaxed text-body">Official install steps, interactive prompts, exact pins, peer ranges, secrets. None of it hard, all of it tedious, all of it easy to get subtly wrong.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HOW IT WORKS ===================== -->
+    <section id="how" class="relative border-y border-accent/[0.06] bg-surface/15">
+      <div class="mx-auto max-w-[1400px] px-5 py-20 md:py-28">
+        <div class="reveal max-w-[62ch]">
+          <div class="kicker text-[11px] text-accent/70">how it works</div>
+          <h2 class="mt-3 text-4xl font-bold tracking-tight text-heading md:text-5xl lg:text-[3.2rem]">you make the calls, stack-it does the legwork</h2>
+          <p class="mt-5 leading-relaxed text-body"><span class="font-mono text-zinc-200">stack-it</span> leaves the decisions to you but helps you make them. First it decides what the shape of the stack should be, defining a series of what we call "slots" these are placeholders for tools, frameworks, languages, etc. It then goes and researches online to generate a list of options for you. it does the research, pinning, vetting, installing, proving, and documenting in between. The orchestrator <span class="font-mono text-zinc-200">setup-stack</span> runs the whole thing and resumes from wherever you already are.</p>
+        </div>
+
+        <!-- the you / stack-it journey -->
+        <div class="diagram mt-14 overflow-x-auto pb-2" data-draw>
+          <svg viewBox="0 0 1160 300" class="min-w-[980px]" fill="none" font-family="'Roboto Mono', monospace">
+            <!-- legend -->
+            <g>
+              <circle cx="864" cy="26" r="6" fill="oklch(0.72 0.16 168)"/><text x="876" y="30" fill="#a1a1aa" font-size="11">you</text>
+              <circle cx="936" cy="26" r="6" fill="#18181b" stroke="#3f3f46" stroke-width="2"/><text x="948" y="30" fill="#a1a1aa" font-size="11">stack-it</text>
+            </g>
+
+            <!-- rail -->
+            <path class="draw" d="M70 120 H1090" stroke="#27272a" stroke-width="2"/>
+            <path class="draw" d="M70 120 H1090" stroke="oklch(0.76 0.12 168)" stroke-width="2" stroke-opacity="0.45"/>
+
+            <!-- artifact pills on the rail -->
+            <g class="node"><rect x="320" y="109" width="92" height="22" rx="7" fill="#0b0b0d" stroke="oklch(0.76 0.12 168)" stroke-opacity="0.3"/><text x="366" y="124" fill="#9ca3af" font-size="10" text-anchor="middle">slots.yaml</text></g>
+            <g class="node"><rect x="540" y="109" width="94" height="22" rx="7" fill="#0b0b0d" stroke="oklch(0.76 0.12 168)" stroke-opacity="0.3"/><text x="587" y="124" fill="#9ca3af" font-size="10" text-anchor="middle">stack.yaml</text></g>
+
+            <!-- nodes -->
+            <g class="node"><circle cx="70" cy="120" r="9" fill="oklch(0.72 0.16 168)"/><text x="70" y="150" fill="#d4d4d8" font-size="11" text-anchor="middle">describe it</text><text x="70" y="166" fill="oklch(0.72 0.12 168)" font-size="8.5" text-anchor="middle">YOU</text></g>
+            <g class="node"><circle cx="274" cy="120" r="9" fill="#18181b" stroke="#3f3f46" stroke-width="2"/><text x="274" y="150" fill="#d4d4d8" font-size="11" text-anchor="middle">map decisions</text><text x="274" y="166" fill="#52525b" font-size="8.5" text-anchor="middle">identify-slots</text></g>
+            <g class="node"><circle cx="478" cy="120" r="11" fill="oklch(0.72 0.16 168)"/><text x="478" y="150" fill="#e4e4e7" font-size="11" text-anchor="middle" font-weight="600">choose tools</text><text x="478" y="166" fill="oklch(0.72 0.12 168)" font-size="8.5" text-anchor="middle">YOU &middot; from vetted options</text></g>
+            <g class="node"><circle cx="682" cy="120" r="9" fill="#18181b" stroke="#3f3f46" stroke-width="2"/><text x="682" y="150" fill="#d4d4d8" font-size="11" text-anchor="middle">install</text><text x="682" y="166" fill="#52525b" font-size="8.5" text-anchor="middle">install-stack</text></g>
+            <g class="node"><circle cx="886" cy="120" r="9" fill="#18181b" stroke="#3f3f46" stroke-width="2"/><text x="886" y="150" fill="#d4d4d8" font-size="11" text-anchor="middle">prove it green</text><text x="886" y="166" fill="#52525b" font-size="8.5" text-anchor="middle">scaffold-and-verify</text></g>
+            <g class="node"><circle cx="1090" cy="120" r="9" fill="#18181b" stroke="#3f3f46" stroke-width="2"/><text x="1090" y="150" fill="#d4d4d8" font-size="11" text-anchor="middle">document</text><text x="1090" y="166" fill="#52525b" font-size="8.5" text-anchor="middle">document-stack</text></g>
+
+            <!-- incompatibility loop: prove -> choose -->
+            <path class="draw" d="M886 131 C886 232 478 232 478 133" stroke="oklch(0.76 0.12 168)" stroke-width="1.6" stroke-opacity="0.55" stroke-dasharray="5 5"/>
+            <path d="M478 133 l-6 -10 l12 0 z" fill="oklch(0.76 0.12 168)" fill-opacity="0.75"/>
+            <text x="682" y="214" fill="#71717a" font-size="10.5" text-anchor="middle">won't work together? stack-it catches it and sends you back to re-choose</text>
+
+            <!-- orchestrator caption -->
+            <text x="70" y="280" fill="#52525b" font-size="10">setup-stack orchestrates the whole journey &middot; resumes at the first unfinished step &middot; everything flows through .claude/stack-it/</text>
+          </svg>
+        </div>
+
+        <!-- compact step legend -->
+        <div class="reveal mt-12 divide-y divide-accent/[0.06] border-y border-border-subtle font-mono text-[12.5px]">
+          <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">identify-slots</span><span class="text-muted">maps your idea to the decisions it needs, categories, not products</span></div>
+          <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">decide</span><span class="text-muted">researches each slot, you pick, then pins and vets the choice</span></div>
+          <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">install</span><span class="text-muted">runs the official steps in order, at the pinned versions</span></div>
+          <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">scaffold-and-verify</span><span class="text-muted">builds a real slice and runs it green: build, lint, tests, dev, console</span></div>
+          <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">document</span><span class="text-muted">writes the stack into CLAUDE.md and the README, refreshably</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== OPTIONS ===================== -->
+    <section id="options" class="mx-auto max-w-[1400px] px-5 py-20 md:py-28">
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
+        <div class="reveal lg:sticky lg:top-28 lg:self-start">
+          <div class="kicker text-[11px] text-accent/70">options, not guesswork</div>
+          <h2 class="mt-3 text-4xl font-bold tracking-tight text-heading md:text-5xl lg:text-[3.2rem]">it brings you a short list, you decide</h2>
+          <p class="mt-5 max-w-[50ch] leading-relaxed text-body">stack-it never picks behind your back. For each open slot it researches the field and surfaces two to four current, vetted options with the tradeoff that actually matters. You choose; it pins the exact version and re-checks it for advisories. Hard preferences are honored from the start.</p>
+          <p class="mt-4 max-w-[50ch] text-sm leading-relaxed text-muted">It's the difference between a tool that decides for you and one that helps you decide well.</p>
+        </div>
+
+        <!-- decision picker mock -->
+        <div class="reveal">
+          <div class="overflow-hidden rounded-2xl border border-border-subtle bg-surface/30 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.8)]">
+            <div class="flex items-center justify-between border-b border-border-subtle px-5 py-3.5">
+              <div class="flex items-center gap-2.5 font-mono text-[12px]">
+                <span class="text-accent-dim">decide-stack</span>
+                <span class="text-disabled">/</span>
+                <span class="text-zinc-200">database</span>
+              </div>
+              <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-disabled">3 vetted options</span>
+            </div>
+            <div class="space-y-2.5 p-5">
+              <!-- selected option -->
+              <div class="rounded-xl border border-accent/30 bg-accent/[0.05] p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-baseline gap-2.5">
+                    <span class="font-mono text-sm text-heading">PostgreSQL</span>
+                    <span class="font-mono text-[11px] text-accent-dim">16.4</span>
+                  </div>
+                  <span class="inline-flex items-center gap-1.5 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 font-mono text-[10px] text-accent">
+                    <svg viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    your pick
+                  </span>
+                </div>
+                <p class="mt-2 text-sm leading-relaxed text-body">Relational, battle-tested, the safe default for almost any app with real data.</p>
+                <div class="mt-3 flex flex-wrap gap-2 font-mono text-[10px]">
+                  <span class="rounded border border-accent/20 bg-accent/[0.06] px-2 py-0.5 text-accent-dim">most trusted</span>
+                  <span class="rounded border border-border-subtle px-2 py-0.5 text-muted">no known advisories</span>
+                  <span class="rounded border border-border-subtle px-2 py-0.5 text-muted">pinned 16.4</span>
+                </div>
+              </div>
+              <!-- other options -->
+              <div class="rounded-xl border border-border-subtle bg-white/[0.02] p-4">
+                <div class="flex items-baseline gap-2.5">
+                  <span class="font-mono text-sm text-zinc-200">SQLite</span>
+                  <span class="font-mono text-[11px] text-disabled">3.46</span>
+                </div>
+                <p class="mt-2 text-sm leading-relaxed text-muted">Zero-config and file-based. Great for local-first, small, or embedded apps.</p>
+                <div class="mt-3 flex flex-wrap gap-2 font-mono text-[10px]">
+                  <span class="rounded border border-border-subtle px-2 py-0.5 text-muted">simplest</span>
+                  <span class="rounded border border-border-subtle px-2 py-0.5 text-muted">vetted</span>
+                </div>
+              </div>
+              <div class="rounded-xl border border-border-subtle bg-white/[0.02] p-4">
+                <div class="flex items-baseline gap-2.5">
+                  <span class="font-mono text-sm text-zinc-200">MongoDB</span>
+                  <span class="font-mono text-[11px] text-disabled">7.0</span>
+                </div>
+                <p class="mt-2 text-sm leading-relaxed text-muted">Document store for flexible, evolving schemas and nested data.</p>
+                <div class="mt-3 flex flex-wrap gap-2 font-mono text-[10px]">
+                  <span class="rounded border border-border-subtle px-2 py-0.5 text-muted">schemaless</span>
+                  <span class="rounded border border-border-subtle px-2 py-0.5 text-muted">vetted</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="mt-3 font-mono text-[11px] text-disabled">researched per slot &middot; tradeoffs surfaced &middot; your choice pinned and re-vetted</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SAFEGUARDS ===================== -->
+    <section id="safeguards" class="relative overflow-hidden border-y border-accent/[0.06] bg-surface/15">
+      <div class="aurora pointer-events-none absolute -right-40 top-10 -z-10 h-[30rem] w-[30rem] rounded-full bg-accent/[0.06]"></div>
+      <div class="mx-auto max-w-[1400px] px-5 py-20 md:py-28">
+        <div class="reveal max-w-[64ch]">
+          <div class="kicker text-[11px] text-accent/70">the pesky parts, handled</div>
+          <h2 class="mt-3 text-4xl font-bold tracking-tight text-heading md:text-5xl lg:text-[3.2rem]">the tedious, error-prone parts are the point</h2>
+          <p class="mt-5 leading-relaxed text-body">The setup work that's easy to get subtly wrong is exactly what stack-it takes off your plate. The riskiest part is the part you can't see: a dependency carrying a known CVE, or a version that was hijacked hours ago and pulled in before anyone noticed. So before anything touches your machine, every choice is pinned and security-vetted.</p>
+        </div>
+
+        <!-- featured: security -->
+        <div class="reveal group relative mt-12 overflow-hidden rounded-2xl border border-accent/25 bg-accent/[0.05] p-7 md:p-9">
+          <div class="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/10 blur-3xl"></div>
+          <div class="relative grid grid-cols-1 gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <span class="grid h-8 w-8 place-items-center rounded-lg border border-accent/30 bg-accent/10"><svg viewBox="0 0 24 24" class="h-4.5 w-4.5 text-accent" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-3.1 7.6-7 9-3.9-1.4-7-4.4-7-9V6l7-3z" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <h3 class="font-mono text-lg tracking-tight text-accent">security, before it lands</h3>
+              </div>
+              <p class="mt-3 max-w-[56ch] text-sm leading-relaxed text-body">Most setup risk is invisible until it isn't. stack-it does the security legwork on every dependency, so a vulnerable or compromised package doesn't ride into your project unnoticed.</p>
+
+              <div class="mt-6 space-y-5">
+                <div class="flex gap-3.5">
+                  <span class="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-accent/20 bg-accent/[0.07]"><svg viewBox="0 0 24 24" class="h-4 w-4 text-accent-dim" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-3.1 7.6-7 9-3.9-1.4-7-4.4-7-9V6l7-3z" stroke-linejoin="round"/><path d="M9.5 12l1.8 1.8 3.5-3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  <div>
+                    <h4 class="font-mono text-[13px] text-heading">CVE &amp; advisory scan</h4>
+                    <p class="mt-1 text-sm leading-relaxed text-body">Every pick is checked for CVEs, advisories, and significant open issues against GitHub Security Advisories and the language's advisory database, where one exists. Anything affecting your chosen version is flagged before you commit to it, not after it's in your lockfile.</p>
+                  </div>
+                </div>
+                <div class="flex gap-3.5">
+                  <span class="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-accent/20 bg-accent/[0.07]"><svg viewBox="0 0 24 24" class="h-4 w-4 text-accent-dim" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke-linecap="round"/></svg></span>
+                  <div>
+                    <h4 class="font-mono text-[13px] text-heading">exact pins, no loose ranges</h4>
+                    <p class="mt-1 text-sm leading-relaxed text-body">Each tool is pinned to the exact version that was vetted, never a floating <span class="font-mono text-zinc-300">^</span> or <span class="font-mono text-zinc-300">~</span> range. Those ranges are how one poisoned patch auto-installs across thousands of projects at once; pinning shuts that door and keeps every build reproducible.</p>
+                  </div>
+                </div>
+                <div class="flex gap-3.5">
+                  <span class="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-accent/20 bg-accent/[0.07]"><svg viewBox="0 0 24 24" class="h-4 w-4 text-accent-dim" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  <div>
+                    <h4 class="font-mono text-[13px] text-heading">fresh-release quarantine</h4>
+                    <p class="mt-1 text-sm leading-relaxed text-body">A version published in the last couple of weeks gets an extra supply-chain pass. The classic attack is a hijacked maintainer account pushing a malicious release that's live for only hours, so stack-it prefers the last vetted version or waits out a quarantine window (npm's <span class="font-mono text-zinc-300">min-release-age</span>, and equivalents elsewhere).</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="diagram rounded-xl border border-border-subtle bg-zinc-950/40 p-5" data-draw>
+              <p class="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-disabled">fresh releases wait their turn</p>
+              <svg viewBox="0 0 360 160" class="w-full" fill="none" font-family="'Roboto Mono', monospace">
+                <rect x="246" y="40" width="98" height="82" rx="10" fill="#3f3f46" fill-opacity="0.1" stroke="#52525b" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+                <text x="295" y="32" fill="#a1a1aa" font-size="8.5" text-anchor="middle">quarantine window</text>
+                <path class="draw" d="M28 86 H332" stroke="#27272a" stroke-width="2"/>
+                <path class="draw" d="M28 86 H332" stroke="oklch(0.76 0.12 168)" stroke-width="2" stroke-opacity="0.4"/>
+                <g class="node"><circle cx="64" cy="86" r="5" fill="#18181b" stroke="#3f3f46" stroke-width="2"/><text x="64" y="108" fill="#71717a" font-size="8.5" text-anchor="middle">4.4.0</text></g>
+                <g class="node"><circle cx="160" cy="86" r="8" fill="oklch(0.72 0.16 168)"/><text x="160" y="108" fill="#d4d4d8" font-size="9" text-anchor="middle">4.4.2</text><text x="160" y="120" fill="oklch(0.7 0.12 168)" font-size="7.5" text-anchor="middle">pinned &middot; last vetted</text></g>
+                <g class="node"><circle cx="295" cy="86" r="6" fill="#0b0b0d" stroke="#5b5b63" stroke-width="2"/><text x="295" y="62" fill="#a1a1aa" font-size="9" text-anchor="middle">4.5.0</text><text x="295" y="108" fill="#71717a" font-size="7.5" text-anchor="middle">3 days old &middot; held</text></g>
+                <text x="180" y="146" fill="#71717a" font-size="8.5" text-anchor="middle">brand-new releases wait; the last vetted version gets pinned</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- incompatible choices -->
+        <div class="reveal mt-4 rounded-2xl border border-border-subtle bg-surface/30 p-7 md:p-9">
+          <div class="grid grid-cols-1 gap-7 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div>
+              <h3 class="font-mono text-base tracking-tight text-heading">incompatible choices, caught</h3>
+              <p class="mt-2 max-w-[58ch] text-sm leading-relaxed text-body">When a check fails, stack-it works out whose fault it is. A wrong example it just fixes. A pin that won't resolve it bumps to the nearest patch and records. But two tools that fundamentally can't coexist is a <span class="text-zinc-200">stack fault</span>, the only thing it stops on. It won't silently swap your choice; it surfaces the conflict and brings you back to re-decide that one slot.</p>
+              <div class="mt-4 flex flex-wrap gap-2 font-mono text-[11px]">
+                <span class="rounded-md border border-border-subtle bg-white/[0.03] px-2.5 py-1 text-muted">slice fault &middot; auto-fix</span>
+                <span class="rounded-md border border-border-subtle bg-white/[0.03] px-2.5 py-1 text-muted">pin drift &middot; auto-fix + flag</span>
+                <span class="rounded-md border border-accent/30 bg-accent/10 px-2.5 py-1 text-accent">stack fault &middot; stop &amp; re-decide</span>
+              </div>
+            </div>
+              <div class="diagram rounded-xl border border-border-subtle bg-zinc-950/40 p-5" data-draw>
+                <svg viewBox="0 0 360 172" class="w-full" fill="none" font-family="'Roboto Mono', monospace">
+                  <!-- two pinned choices that clash -->
+                  <g class="node"><rect x="16" y="18" width="150" height="48" rx="12" fill="#18181b" stroke="#27272a"/><text x="91" y="40" fill="#e4e4e7" font-size="11" text-anchor="middle">pydantic 1.x</text><text x="91" y="55" fill="#71717a" font-size="8.5" text-anchor="middle">your hard requirement</text></g>
+                  <g class="node"><rect x="194" y="18" width="150" height="48" rx="12" fill="#18181b" stroke="#27272a"/><text x="269" y="40" fill="#e4e4e7" font-size="11" text-anchor="middle">settings 2.x</text><text x="269" y="55" fill="#71717a" font-size="8.5" text-anchor="middle">needs pydantic 2</text></g>
+                  <!-- severed link + conflict badge -->
+                  <path class="draw" d="M166 42 H171" stroke="#52525b" stroke-width="2"/>
+                  <path class="draw" d="M189 42 H194" stroke="#52525b" stroke-width="2"/>
+                  <g class="node"><circle cx="180" cy="42" r="9.5" fill="#0b0b0d" stroke="#5b5b63"/><path d="M176.6 38.6 L183.4 45.4 M183.4 38.6 L176.6 45.4" stroke="#d4d4d8" stroke-width="1.7" stroke-linecap="round"/></g>
+                  <text x="180" y="84" fill="#71717a" font-size="8.5" text-anchor="middle">can't coexist &middot; no version reconciles them</text>
+                  <!-- resolution: stop and loop back to decide -->
+                  <path class="draw" d="M180 94 V120" stroke="oklch(0.76 0.12 168)" stroke-width="1.8" stroke-opacity="0.75"/>
+                  <path d="M180 126 l-5.5 -8 l11 0 z" fill="oklch(0.76 0.12 168)"/>
+                  <g class="node"><rect x="92" y="128" width="176" height="32" rx="10" fill="oklch(0.76 0.12 168 / 0.12)" stroke="oklch(0.76 0.12 168)" stroke-opacity="0.55"/><text x="180" y="148" fill="#e4e4e7" font-size="10.5" text-anchor="middle">&rarr; re-decide the slot</text></g>
+                </svg>
+              </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== GET STARTED ===================== -->
+    <section id="start" class="mx-auto max-w-[1400px] px-5 py-20 md:py-28">
+      <div class="reveal max-w-[60ch]">
+        <div class="kicker text-[11px] text-accent/70">get started</div>
+        <h2 class="mt-3 text-4xl font-bold tracking-tight text-heading md:text-5xl lg:text-[3.2rem]">from empty folder to running stack</h2>
+        <p class="mt-5 leading-relaxed text-body">Add the plugin, then let the orchestrator run the whole journey, or call any single stage on its own.</p>
+      </div>
+
+      <div class="mt-12 grid grid-cols-1 gap-4 lg:grid-cols-2" data-stagger>
+        <div class="rounded-2xl border border-border-subtle bg-surface/30 p-7">
+          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-disabled">install</p>
+          <h3 class="mt-2 text-lg font-semibold text-heading">add the plugin</h3>
+          <div class="group relative mt-4">
+            <button class="copy-btn absolute right-2 top-2 z-10 flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-zinc-800 bg-surface text-muted opacity-0 transition-all hover:bg-zinc-800 hover:text-zinc-200 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 group-hover:opacity-100" data-copy="claude plugin marketplace add pricklywiggles/fractally-claude-marketplace&#10;claude plugin install stack-it@fractally-claude-marketplace" aria-label="Copy commands to clipboard" title="Copy to clipboard">
+              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+            <pre class="overflow-x-auto rounded-lg border border-border-subtle bg-zinc-950/60 p-4 font-mono text-[11.5px] leading-relaxed text-zinc-300" role="region" aria-label="Installation commands">claude plugin marketplace add pricklywiggles/fractally-claude-marketplace
+claude plugin install stack-it@fractally-claude-marketplace</pre>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-border-subtle bg-surface/30 p-7">
+          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-disabled">run</p>
+          <h3 class="mt-2 text-lg font-semibold text-heading">the whole journey, or one stage</h3>
+          <pre class="mt-4 overflow-x-auto whitespace-pre-wrap break-words rounded-lg border border-accent/20 bg-accent/[0.05] p-4 font-mono text-[11.5px] leading-relaxed text-zinc-300" role="region" aria-label="Usage examples"><span class="text-zinc-200">/stack-it:setup-stack &lt;input&gt;</span>   <span class="text-muted">// supports resume from last run</span>
+
+<span class="text-accent">&gt;</span> I'm making a colorful go cli with a great user experience, help me decide my stack
+<span class="text-accent">&gt;</span> I'm starting a new editorial web project with cutting edge motion graphics for our company website, I need to decide my stack.
+<span class="text-accent">&gt;</span> verify my installed stack works
+<span class="text-accent">&gt;</span> document this project's stack</pre>
+          <p class="mt-3 text-sm leading-relaxed text-muted">One resume-aware orchestrator plus five standalone, individually callable stage skills.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer class="border-t border-border-subtle">
+      <div class="mx-auto flex max-w-[1400px] flex-col gap-6 px-5 py-12 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="grid h-7 w-7 place-items-center rounded-lg border border-accent/30 bg-accent/10">
+            <svg viewBox="0 0 24 24" class="h-4 w-4 text-accent" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z" stroke-linejoin="round"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="font-mono text-sm text-zinc-300">stack-it</span>
+          <span class="rounded-md border border-border-subtle px-1.5 py-0.5 font-mono text-[10px] text-muted">v0.1.0</span>
+        </div>
+        <div class="flex items-center gap-6 font-mono text-xs text-muted">
+          <a href="index.html" class="hover:text-heading">marketplace</a>
+          <a href="ship-it.html" class="hover:text-heading">ship-it</a>
+          <a href="https://github.com/pricklywiggles/fractally-claude-marketplace" target="_blank" rel="noopener noreferrer" class="hover:text-heading">GitHub</a>
+        </div>
+        <p class="font-mono text-[11px] text-disabled">Made with ❤️ in Los Angeles</p>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    (function () {
+      // delegated copy buttons (data-copy holds the text)
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest && e.target.closest('.copy-btn');
+        if (!btn) return;
+        var text = btn.getAttribute('data-copy') || '';
+        navigator.clipboard && navigator.clipboard.writeText(text);
+        var original = btn.innerHTML;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" class="h-4 w-4 text-accent" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l4 4L19 6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        setTimeout(function () { btn.innerHTML = original; }, 2000);
+      });
+
+      function init() {
+        if (!window.gsap || !window.ScrollTrigger) return;
+        var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.to('#progress', { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: function () { return document.body.scrollHeight - window.innerHeight; }, scrub: 0.3 } });
+
+        if (prefersReduced) return;
+
+        gsap.utils.toArray('.reveal').forEach(function (el) {
+          gsap.from(el, { y: 36, opacity: 0, duration: 1.0, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+        });
+
+        gsap.utils.toArray('[data-stagger]').forEach(function (group) {
+          gsap.from(group.children, { y: 28, opacity: 0, duration: 0.8, stagger: 0.09, ease: 'power3.out', scrollTrigger: { trigger: group, start: 'top 84%' } });
+        });
+
+        gsap.utils.toArray('[data-draw]').forEach(function (svg) {
+          var draws = svg.querySelectorAll('.draw');
+          draws.forEach(function (p) {
+            var len;
+            try { len = p.getTotalLength(); } catch (e) { len = 400; }
+            if (!len || !isFinite(len)) len = 400;
+            gsap.set(p, { strokeDasharray: len, strokeDashoffset: len });
+            gsap.to(p, { strokeDashoffset: 0, duration: 1.3, ease: 'power2.inOut', scrollTrigger: { trigger: svg, start: 'top 80%' } });
+          });
+          var nodes = svg.querySelectorAll('.node');
+          if (nodes.length) {
+            gsap.from(nodes, { scale: 0.55, opacity: 0, transformOrigin: '50% 50%', duration: 0.6, stagger: 0.09, ease: 'back.out(1.7)', scrollTrigger: { trigger: svg, start: 'top 80%' } });
+          }
+        });
+
+        // per-slot option reels: candidate tools rotate in and out, settling on the chosen pick
+        gsap.utils.toArray('.cycle').forEach(function (cell, i) {
+          var reel = cell.querySelector('.reel');
+          if (!reel || reel.children.length < 2) return;
+          reel.appendChild(reel.children[0].cloneNode(true)); // dup the pick for a seamless loop
+          var count = reel.children.length;
+          var h = cell.clientHeight || 18;
+          var step = 0;
+          function tick() {
+            step += 1;
+            gsap.to(reel, { y: -step * h, duration: 0.5, ease: 'power3.inOut', onComplete: function () {
+              if (step >= count - 1) { step = 0; gsap.set(reel, { y: 0 }); }
+              gsap.delayedCall(1.7 + Math.random() * 1.2, tick);
+            } });
+          }
+          gsap.delayedCall(1.0 + i * 0.18 + Math.random() * 0.6, tick);
+        });
+
+        ScrollTrigger.refresh();
+      }
+
+      if (document.readyState === 'complete') { setTimeout(init, 60); }
+      else { window.addEventListener('load', function () { setTimeout(init, 60); }); }
+    })();
+  </script>
+
+  <noscript>
+    <style>
+      .reveal, [data-stagger] { opacity: 1 !important; transform: none !important; }
+    </style>
+  </noscript>
+</body>
+</html>
