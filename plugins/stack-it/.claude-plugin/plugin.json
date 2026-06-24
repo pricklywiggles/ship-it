@@ -1,0 +1,9 @@
+{
+  "name": "stack-it",
+  "description": "Plan, decide, install, verify, and document a new project's tech stack end to end: identify the decision categories (slots), research and pick version-pinned, security-vetted tools for each, install the locked stack, scaffold a minimal vertical slice and run it green to prove the stack works, then document the stack for agents and humans. A guided, resume-aware orchestrator (setup-stack) plus five standalone, individually callable stage skills that chain into one pipeline.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gustavo Gallegos",
+    "email": "goose@fractal.ly"
+  }
+}

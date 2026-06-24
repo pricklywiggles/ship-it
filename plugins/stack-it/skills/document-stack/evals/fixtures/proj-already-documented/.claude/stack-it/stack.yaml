@@ -1,0 +1,54 @@
+project:
+  description: Minimal REST API for a todo list with one persisted resource
+  type: api-service
+  platforms: [linux-server, macos]
+stack:
+  - slot: language/runtime
+    choice: Python
+    version: 3.14.3
+    install:
+      - python3 is already installed; verify with `python3 --version`
+    caveats: []
+    notes: Use system Python; manage the project environment with uv.
+  - slot: package/env manager
+    choice: uv
+    version: 0.6.12
+    install:
+      - uv is already installed; run `uv init` then `uv venv` in the project dir
+    caveats: []
+    notes: null
+  - slot: web framework
+    choice: FastAPI
+    version: 0.115.0
+    install:
+      - uv add fastapi
+    caveats: []
+    notes: null
+  - slot: ASGI server
+    choice: uvicorn
+    version: 0.34.0
+    install:
+      - uv add "uvicorn[standard]"
+    caveats: []
+    notes: Used to boot the app for the runtime check.
+  - slot: ORM / DB layer
+    choice: SQLModel
+    version: 0.0.22
+    install:
+      - uv add sqlmodel
+    caveats: []
+    notes: Backed by a local SQLite file for the slice.
+  - slot: test framework
+    choice: pytest
+    version: 8.3.0
+    install:
+      - uv add --dev pytest httpx
+    caveats: []
+    notes: httpx provides FastAPI's TestClient transport.
+  - slot: linter / formatter
+    choice: Ruff
+    version: 0.8.0
+    install:
+      - uv add --dev ruff
+    caveats: []
+    notes: null

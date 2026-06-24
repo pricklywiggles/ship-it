@@ -1,0 +1,41 @@
+/* Source for docs/styles.css. There is no CI build, compile locally with the
+   Tailwind v4 standalone CLI (no Node required) and commit the output:
+
+     curl -fsSL -o /tmp/tailwindcss \
+       https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64
+     chmod +x /tmp/tailwindcss
+     (cd docs && /tmp/tailwindcss -i _src/app.css -o styles.css --minify)
+
+   Rebuild and commit docs/styles.css whenever the HTML class usage changes. */
+@import "tailwindcss";
+@source "../*.html";
+
+@theme {
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-accent: oklch(0.72 0.16 168);
+  --color-accent-dim: oklch(0.55 0.12 168);
+  --color-ink: oklch(0.16 0.005 285);
+  --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* teal-tinted neutrals: harmonize with accent instead of dead zinc */
+  --color-heading: oklch(0.94 0.01 168);
+  --color-body: oklch(0.72 0.01 168);
+  --color-muted: oklch(0.55 0.01 168);
+  --color-disabled: oklch(0.42 0.01 168);
+  --color-surface: oklch(0.17 0.01 168);
+  --color-border-subtle: oklch(1 0 0 / 0.08);
+}
+
+/* a11y (audit pass): a visible focus ring everywhere, and copy buttons that
+   reveal on touch devices (which have no hover to trigger group-hover). */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (hover: none) {
+  .copy-btn { opacity: 0.6; }
+}

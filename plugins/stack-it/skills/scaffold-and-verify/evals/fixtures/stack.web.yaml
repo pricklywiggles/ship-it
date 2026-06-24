@@ -1,0 +1,77 @@
+project:
+  description: Minimal React single-page app with a styled contact form
+  type: web-app
+  platforms: [browser]
+stack:
+  - slot: language/runtime
+    choice: Node.js
+    version: 26.0.0
+    install:
+      - node is already installed; verify with `node --version`
+    caveats: []
+    notes: Use the system Node; do not reinstall.
+  - slot: package manager
+    choice: npm
+    version: 11.12.1
+    install:
+      - bundled with Node; verify with `npm --version`
+    caveats: []
+    notes: null
+  - slot: build tool / dev server
+    choice: Vite
+    version: 7.1.0
+    install:
+      - npm create vite@latest . -- --template react-ts
+      - npm install
+    caveats: []
+    notes: Scaffolds the React + TypeScript project skeleton.
+  - slot: UI framework
+    choice: React
+    version: 19.1.0
+    install:
+      - provided by the Vite react-ts template; verify it resolves to 19.x
+    caveats: []
+    notes: null
+  - slot: language
+    choice: TypeScript
+    version: 5.7.3
+    install:
+      - provided by the Vite react-ts template
+    caveats: []
+    notes: null
+  - slot: CSS framework
+    choice: Tailwind CSS
+    version: 4.1.11
+    install:
+      - npm install -D tailwindcss @tailwindcss/vite
+      - add the @tailwindcss/vite plugin to the Vite config and `@import "tailwindcss";` to the main stylesheet
+    caveats: []
+    notes: Tailwind v4 uses the Vite plugin, not a tailwind.config.js by default.
+  - slot: form library
+    choice: react-hook-form
+    version: 7.54.0
+    install:
+      - npm install react-hook-form
+    caveats: []
+    notes: null
+  - slot: test framework
+    choice: Vitest
+    version: 3.2.0
+    install:
+      - npm install -D vitest jsdom
+    caveats: []
+    notes: Use the jsdom environment for component tests.
+  - slot: component testing
+    choice: "@testing-library/react"
+    version: 16.1.0
+    install:
+      - npm install -D @testing-library/react @testing-library/jest-dom @testing-library/user-event
+    caveats: []
+    notes: null
+  - slot: linter
+    choice: ESLint
+    version: 9.17.0
+    install:
+      - provided and configured by the Vite react-ts template; verify `npx eslint .` runs
+    caveats: []
+    notes: null

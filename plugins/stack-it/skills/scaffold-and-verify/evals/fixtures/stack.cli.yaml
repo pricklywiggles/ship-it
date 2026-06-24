@@ -1,0 +1,56 @@
+project:
+  description: Minimal command-line tool with one subcommand
+  type: cli
+  platforms: [macos, linux-server]
+stack:
+  - slot: language/runtime
+    choice: Node.js
+    version: 26.0.0
+    install:
+      - node is already installed; verify with `node --version`
+    caveats: []
+    notes: Use the system Node; do not reinstall.
+  - slot: package manager
+    choice: npm
+    version: 11.12.1
+    install:
+      - bundled with Node; verify with `npm --version`
+    caveats: []
+    notes: null
+  - slot: language
+    choice: TypeScript
+    version: 5.7.0
+    install:
+      - npm install -D typescript
+    caveats: []
+    notes: null
+  - slot: CLI framework
+    choice: commander
+    version: 12.1.0
+    install:
+      - npm install commander
+    caveats: []
+    notes: Provides argument parsing and subcommands.
+  - slot: build / bundler
+    choice: tsup
+    version: 8.3.0
+    install:
+      - npm install -D tsup
+      - build the CLI to dist/ with a bin entry
+    caveats: []
+    notes: Bundles the TypeScript CLI to runnable JS.
+  - slot: test framework
+    choice: Vitest
+    version: 2.1.8
+    install:
+      - npm install -D vitest
+    caveats: []
+    notes: Unit-tests the core command logic.
+  - slot: linter
+    choice: ESLint
+    version: 9.17.0
+    install:
+      - npm install -D eslint typescript-eslint
+      - add a flat eslint.config.js
+    caveats: []
+    notes: null

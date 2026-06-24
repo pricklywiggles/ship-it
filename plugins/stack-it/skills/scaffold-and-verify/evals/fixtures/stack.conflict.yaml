@@ -1,0 +1,57 @@
+project:
+  description: Internal validation service that must emit Pydantic v1 schemas for a downstream consumer
+  type: api-service
+  platforms: [linux-server, macos]
+stack:
+  - slot: language/runtime
+    choice: Python
+    version: 3.13.7
+    install:
+      - provision with uv via `uv python pin 3.13.7`
+    caveats: []
+    notes: Pinned to 3.13 deliberately; not a 3.14 project.
+  - slot: package/env manager
+    choice: uv
+    version: 0.6.12
+    install:
+      - uv is already installed; run `uv init` then `uv venv` in the project dir
+    caveats: []
+    notes: null
+  - slot: web framework
+    choice: FastAPI
+    version: 0.115.0
+    install:
+      - uv add fastapi==0.115.0
+    caveats: []
+    notes: null
+  - slot: data validation
+    choice: Pydantic
+    version: 1.10.18
+    install:
+      - uv add pydantic==1.10.18
+    caveats: []
+    notes: >-
+      HARD product constraint: a downstream system consumes this service's
+      Pydantic v1 schema output (v1 .dict()/.schema() shapes), so the validation
+      layer must stay on Pydantic v1. Do not upgrade to Pydantic v2.
+  - slot: configuration / settings
+    choice: pydantic-settings
+    version: 2.6.0
+    install:
+      - uv add pydantic-settings==2.6.0
+    caveats: []
+    notes: Loads app settings from the environment.
+  - slot: test framework
+    choice: pytest
+    version: 8.3.0
+    install:
+      - uv add --dev pytest httpx
+    caveats: []
+    notes: null
+  - slot: linter / formatter
+    choice: Ruff
+    version: 0.8.0
+    install:
+      - uv add --dev ruff
+    caveats: []
+    notes: null

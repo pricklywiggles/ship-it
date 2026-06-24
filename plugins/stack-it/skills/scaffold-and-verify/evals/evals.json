@@ -1,0 +1,33 @@
+{
+  "skill_name": "scaffold-and-verify",
+  "evals": [
+    {
+      "id": 0,
+      "name": "web-react-tailwind-form",
+      "prompt": "I just finished picking and installing my stack for a small web app — the locked stack file is attached (stack.web.yaml). I haven't written any actual code yet. Can you set up a minimal working example that uses the whole stack together and make sure everything genuinely works? It should build, the tests should pass, the linter should be clean, and the page should actually render in a browser without console errors. Let me know if anything in the stack turns out to be a problem.",
+      "expected_output": "A minimal React+TS project (in the run's project dir) with one page rendering a react-hook-form form styled by Tailwind v4, one passing Vitest+RTL component test, clean ESLint, a successful build, a booting dev server confirmed in a browser with a clean console, and a verification report covering every gate.",
+      "files": ["fixtures/stack.web.yaml"]
+    },
+    {
+      "id": 1,
+      "name": "api-fastapi-sqlmodel",
+      "prompt": "Here's the locked stack for my todo API (stack.api.yaml). The tools are chosen and ready to install. Please create the smallest real example that exercises the whole stack — one endpoint that persists something through the ORM, with a test — and verify it all works: it installs, the test passes, the linter is clean, and the server actually boots. Flag anything that's a problem with the stack itself.",
+      "expected_output": "A minimal FastAPI project (in the run's project dir) with one endpoint persisting a record through SQLModel/SQLite, one passing pytest test via TestClient, clean Ruff, a uvicorn boot check, and a verification report covering every gate. Browser gate correctly skipped (no browser surface).",
+      "files": ["fixtures/stack.api.yaml"]
+    },
+    {
+      "id": 2,
+      "name": "cli-commander-tsup",
+      "prompt": "This is the locked stack for a small command-line tool (stack.cli.yaml). Everything's picked; please install it, build a minimal example that uses the whole stack — one real subcommand wired through the CLI framework, with a unit test on its core logic — and verify it actually works: it builds, the test passes, the linter is clean, and the built CLI runs. Tell me about anything that's off with the stack as locked.",
+      "expected_output": "A minimal TypeScript CLI (in the run's project dir) with one commander subcommand calling a unit-tested core function, built by tsup to a runnable bin, clean ESLint, and a runtime check that executes the built CLI. Browser gate correctly skipped. The non-existent typescript@5.7.0 pin is resolved to the nearest patch (pin drift) AND surfaced prominently as a locked-YAML defect to fix upstream.",
+      "files": ["fixtures/stack.cli.yaml"]
+    },
+    {
+      "id": 3,
+      "name": "stackfault-pydantic-conflict",
+      "prompt": "Here's my locked stack for a small internal service (stack.conflict.yaml). The validation layer has to stay on Pydantic v1 because a downstream system consumes our v1 schemas — that's a hard requirement, not negotiable. Please install the stack, build a tiny example that wires the pieces together (a validated model, app settings, one endpoint) with a test, and verify it works. Tell me if anything is wrong with the stack as locked.",
+      "expected_output": "The agent attempts install, hits the unsatisfiable resolution (Pydantic 1.10.18 vs pydantic-settings 2.6.0, which is Pydantic-v2-only with no version that supports v1), respects the hard 'stay on Pydantic v1' constraint, classifies this as a STACK fault (two mutually incompatible chosen libraries, no in-minor escape) rather than silently migrating to v2 or swapping a tool, and escalates to decide-stack with a concrete re-pick (a v1-compatible settings approach, or revisiting the v1 constraint with the user). Browser gate skipped.",
+      "files": ["fixtures/stack.conflict.yaml"]
+    }
+  ]
+}

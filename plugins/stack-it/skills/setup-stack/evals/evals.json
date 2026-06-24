@@ -1,0 +1,34 @@
+{
+  "skill_name": "setup-stack",
+  "note": "Resume-detection eval: read-only, no side effects. Each fixture is a project at a different pipeline state; the skill's Step 1 must pick the correct entry stage and, when the state is ambiguous, confirm rather than guess. Only the statically representable states are committed here. The later transitions (installed->verify, verified->document) depend on a fully resolved dependency tree and a runtime pass, which are not capturable as a small static fixture; the orchestrator re-verifies for those rather than trusting a stale signal.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "empty-project",
+      "prompt": "Set up the whole tech stack for the project at PROJECT_DIR. (Dry run: report which stage you would START at and why; do not run any stage, install, or command.)",
+      "expected_output": "ENTRY STAGE: identify-stack-slots. No .claude/stack-it/ artifacts at all (only IDEA.md), so it starts at the top of the pipeline. Unambiguous.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "slots-only",
+      "prompt": "Set up the whole tech stack for the project at PROJECT_DIR. (Dry run: report which stage you would START at and why; do not run any stage, install, or command.)",
+      "expected_output": "ENTRY STAGE: decide-stack. .claude/stack-it/slots.yaml exists and validates, but there is no stack.yaml, so the slots are identified but tools aren't decided. Unambiguous.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "locked-not-installed",
+      "prompt": "Set up the whole tech stack for the project at PROJECT_DIR. (Dry run: report which stage you would START at and why; do not run any stage, install, or command.)",
+      "expected_output": "ENTRY STAGE: install-stack. A complete .claude/stack-it/stack.yaml exists but nothing is installed (no manifests, no node_modules), so the tools are decided but not installed. Should NOT restart at identify/decide even though slots.yaml is absent, since the downstream artifact already exists. Unambiguous.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "ambiguous-partial-install",
+      "prompt": "Set up the whole tech stack for the project at PROJECT_DIR. (Dry run: report which stage you would START at and why; do not run any stage, install, or command.)",
+      "expected_output": "The signature fail-safe (SKILL.md Step 1): stack.yaml exists, a package.json is present, and a node_modules/ directory exists but resolves nothing (only an empty .package-lock.json) — a false 'installed' signal. The skill must NOT trust the bare node_modules and skip ahead; it should treat the state as ambiguous and CONFIRM the entry stage with the user before proceeding (most likely install-stack, since nothing is actually resolved).",
+      "files": []
+    }
+  ]
+}

@@ -6,13 +6,18 @@
   },
   "metadata": {
     "description": "Fractally's Claude Code plugins",
-    "version": "0.2.1"
+    "version": "0.3.0"
   },
   "plugins": [
     {
       "name": "ship-it",
       "source": "./plugins/ship-it",
       "description": "Ship your work end to end: drive a batch of issues or your current local changes through implement, review, comment cleanup, and PR; keep living docs in sync. A configurable orchestrator plus standalone, individually callable skills. Run init to adapt it to your project."
+    },
+    {
+      "name": "stack-it",
+      "source": "./plugins/stack-it",
+      "description": "Plan, decide, install, verify, and document a new project's tech stack end to end: identify the decision categories (slots), research and pick version-pinned, security-vetted tools for each, install the locked stack, scaffold a minimal vertical slice and run it green to prove the stack works, then document the stack for agents and humans. A guided, resume-aware orchestrator (setup-stack) plus five standalone, individually callable stage skills that chain into one pipeline."
     }
   ]
 }
