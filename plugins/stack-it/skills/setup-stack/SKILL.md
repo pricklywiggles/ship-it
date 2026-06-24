@@ -23,8 +23,8 @@ Run each stage by following that stage's skill, not by re-deriving its behavior.
 
 Don't redo finished work. Before running anything, figure out where the project already is by inspecting:
 
-- `.claude/stack-it/slots.yaml` — have the slots been identified? (validate with `scripts/validate_yaml.py --stage slots` if present)
-- `.claude/stack-it/stack.yaml` — have the tools been decided and locked? (validate with `scripts/validate_yaml.py --stage stack`)
+- `.claude/stack-it/slots.yaml` — have the slots been identified? (validate with `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --stage slots` if present)
+- `.claude/stack-it/stack.yaml` — have the tools been decided and locked? (validate with `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --stage stack`)
 - the project itself — are the locked tools actually installed (manifests and lockfiles present, dependencies resolved)? is there a verification slice, and does it pass? do `CLAUDE.md`/`README` already document the stack?
 
 Map what you find to the first **unfinished** stage:
@@ -72,4 +72,4 @@ This skill sequences the five stage skills; it does not reimplement their logic,
 
 ## Bundled resources
 
-- `scripts/validate_yaml.py` — Validate `.claude/stack-it/` artifacts while detecting the resume point (`--stage slots` for `slots.yaml`, `--stage stack` for `stack.yaml`). Run `python scripts/validate_yaml.py --help` for usage.
+- `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py` — Validate `.claude/stack-it/` artifacts while detecting the resume point (`--stage slots` for `slots.yaml`, `--stage stack` for `stack.yaml`). Run `python ${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --help` for usage.

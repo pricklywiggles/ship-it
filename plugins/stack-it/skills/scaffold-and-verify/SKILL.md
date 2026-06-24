@@ -5,7 +5,7 @@ description: Use this skill to prove a freshly installed project stack actually 
 
 # Scaffold and Verify
 
-The last stage of the stack-it pipeline. The tools are installed (`install-stack` ran); now confirm they actually work **together** before the user builds anything real on top of them. Do this by generating the smallest meaningful slice of a working app that touches every tool in the stack, then running every check until it's all green. A passing slice is the proof; an unrun stack is an unverified one.
+The verification stage of the stack-it pipeline. The tools are installed (`install-stack` ran); now confirm they actually work **together** before the user builds anything real on top of them. Do this by generating the smallest meaningful slice of a working app that touches every tool in the stack, then running every check until it's all green. A passing slice is the proof; an unrun stack is an unverified one.
 
 ## Input
 
@@ -22,7 +22,7 @@ stack:
     notes: <or null>
 ```
 
-Validate the YAML first with `scripts/validate_yaml.py --stage stack .claude/stack-it/stack.yaml` so a malformed handoff fails before you write any code. If there's no installed project yet, point the user to `install-stack`; this skill verifies an install, it doesn't perform one. Surface any `caveats` from the file now, because a known issue is the first thing to suspect when a check fails.
+Validate the YAML first with `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --stage stack .claude/stack-it/stack.yaml` so a malformed handoff fails before you write any code. If there's no installed project yet, point the user to `install-stack`; this skill verifies an install, it doesn't perform one. Surface any `caveats` from the file now, because a known issue is the first thing to suspect when a check fails.
 
 ## The core idea: one vertical slice, not N hello-worlds
 
@@ -84,4 +84,4 @@ When every applicable gate is green, give a short summary: each tool and how the
 
 ## Bundled resources
 
-- `scripts/validate_yaml.py` — Validates the locked stack file before you build against it: checks that every entry has a `choice`, an exact `version`, and at least one `install` step, and that the file parses. Run it first with `--stage stack`. Run `python scripts/validate_yaml.py --help` for usage.
+- `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py` — Validates the locked stack file before you build against it: checks that every entry has a `choice`, an exact `version`, and at least one `install` step, and that the file parses. Run it first with `--stage stack`. Run `python ${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --help` for usage.

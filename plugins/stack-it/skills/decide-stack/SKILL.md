@@ -24,7 +24,7 @@ slots:
     source: ...
 ```
 
-Look for the slots YAML at **`.claude/stack-it/slots.yaml`** (where `identify-stack-slots` writes it), or use a path the user gives. If none is present, ask for it or point the user to `identify-stack-slots` first. This skill fills slots; it doesn't discover them. Validate the input with `scripts/validate_yaml.py --stage slots .claude/stack-it/slots.yaml` before proceeding so a malformed input fails fast.
+Look for the slots YAML at **`.claude/stack-it/slots.yaml`** (where `identify-stack-slots` writes it), or use a path the user gives. If none is present, ask for it or point the user to `identify-stack-slots` first. This skill fills slots; it doesn't discover them. Validate the input with `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --stage slots .claude/stack-it/slots.yaml` before proceeding so a malformed input fails fast.
 
 ## Step 1: Collect hard preferences up front
 
@@ -86,7 +86,7 @@ stack:
     notes: <anything the install stage needs to know, or null>
 ```
 
-Save it to **`.claude/stack-it/stack.yaml`** in the project (creating `.claude/stack-it/` if needed — the pipeline's home for its generated files), then validate with `scripts/validate_yaml.py --stage stack .claude/stack-it/stack.yaml` so a schema mistake is caught now, not in the install stage. This file is the handoff to `install-stack`, and the later stages read and update it in place, so it stays the single source of truth for the stack. If the user ever sends you back here to re-pick a slot (because `install-stack` or `scaffold-and-verify` hit a tool that can't work), edit this same file with the new choice rather than starting a fresh one.
+Save it to **`.claude/stack-it/stack.yaml`** in the project (creating `.claude/stack-it/` if needed — the pipeline's home for its generated files), then validate with `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --stage stack .claude/stack-it/stack.yaml` so a schema mistake is caught now, not in the install stage. This file is the handoff to `install-stack`, and the later stages read and update it in place, so it stays the single source of truth for the stack. If the user ever sends you back here to re-pick a slot (because `install-stack` or `scaffold-and-verify` hit a tool that can't work), edit this same file with the new choice rather than starting a fresh one.
 
 ## When to stop here
 
@@ -94,4 +94,4 @@ If the user only wants the decisions (to commit the YAML, share it, or install o
 
 ## Bundled resources
 
-- `scripts/validate_yaml.py` — Validates the slots input and the stack output against their expected schemas. Run it on input (`--stage slots`) and before handoff (`--stage stack`). It catches missing fields, wrong types, and (for the stack stage) missing versions or install steps. Run `python scripts/validate_yaml.py --help` for usage.
+- `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py` — Validates the slots input and the stack output against their expected schemas. Run it on input (`--stage slots`) and before handoff (`--stage stack`). It catches missing fields, wrong types, and (for the stack stage) missing versions or install steps. Run `python ${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --help` for usage.

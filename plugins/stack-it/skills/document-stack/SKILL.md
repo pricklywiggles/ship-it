@@ -9,7 +9,7 @@ Turn what a project is built on into documentation that serves its two readers: 
 
 ## Step 1: Get the stack — lockfile first, else infer
 
-**If `.claude/stack-it/stack.yaml` exists, that's the source of truth.** Validate it with `scripts/validate_yaml.py --stage stack .claude/stack-it/stack.yaml`, then read the `project`, each slot's `choice`/`version`/`caveats`/`notes`, and the install order. It's already pinned and vetted, so trust it. A quick sanity glance at the codebase is still worth it — if the lockfile and the actual code obviously disagree (a tool the YAML lists is nowhere in the manifests, or vice versa), flag the discrepancy to the user rather than documenting a fiction. But don't re-derive what the lockfile already states.
+**If `.claude/stack-it/stack.yaml` exists, that's the source of truth.** Validate it with `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --stage stack .claude/stack-it/stack.yaml`, then read the `project`, each slot's `choice`/`version`/`caveats`/`notes`, and the install order. It's already pinned and vetted, so trust it. A quick sanity glance at the codebase is still worth it — if the lockfile and the actual code obviously disagree (a tool the YAML lists is nowhere in the manifests, or vice versa), flag the discrepancy to the user rather than documenting a fiction. But don't re-derive what the lockfile already states.
 
 **If there's no lockfile, the user skipped the pipeline and just wants their existing stack documented — so infer it from the codebase.** This is the harder path and the inference can be wrong, so gather evidence before concluding:
 
@@ -61,4 +61,4 @@ This skill documents; it does not install, choose, research, or verify tools —
 
 ## Bundled resources
 
-- `scripts/validate_yaml.py` — Validate the lockfile before trusting it, with `--stage stack`. Run `python scripts/validate_yaml.py --help` for usage.
+- `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py` — Validate the lockfile before trusting it, with `--stage stack`. Run `python ${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --help` for usage.

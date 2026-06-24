@@ -65,7 +65,7 @@ Rules for the YAML:
 - Order slots with required ones first, then optional.
 - Emit only the YAML in the final output block, with no surrounding prose, so the next stage can parse it directly.
 
-After writing the YAML, save it to **`.claude/stack-it/slots.yaml`** in the project, creating the `.claude/stack-it/` directory if it doesn't exist — that directory is the stack-it pipeline's home for the files it generates, and the later stages look there by default. Validate it with `scripts/validate_yaml.py --stage slots .claude/stack-it/slots.yaml`. This catches structural mistakes (missing fields, wrong types, an empty slot list) here, at the source, instead of letting them surface one stage downstream in `decide-stack`. Note what the validator does *not* catch: it checks shape, not meaning, so it won't flag a `slot` value that's accidentally a product name ("Next.js") instead of a category ("web framework"). That distinction is the whole point of this skill, so it stays your responsibility, not the script's.
+After writing the YAML, save it to **`.claude/stack-it/slots.yaml`** in the project, creating the `.claude/stack-it/` directory if it doesn't exist — that directory is the stack-it pipeline's home for the files it generates, and the later stages look there by default. Validate it with `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --stage slots .claude/stack-it/slots.yaml`. This catches structural mistakes (missing fields, wrong types, an empty slot list) here, at the source, instead of letting them surface one stage downstream in `decide-stack`. Note what the validator does *not* catch: it checks shape, not meaning, so it won't flag a `slot` value that's accidentally a product name ("Next.js") instead of a category ("web framework"). That distinction is the whole point of this skill, so it stays your responsibility, not the script's.
 
 Then ask the user to confirm or correct the slot list before it passes to the next stage.
 
@@ -130,4 +130,4 @@ slots:
 
 ## Bundled resources
 
-- `scripts/validate_yaml.py` — Validates the slots YAML this skill produces against the schema `decide-stack` expects. Run it on your output before handoff with `--stage slots`. It verifies the structure (required fields, types, a non-empty slot list); it does not judge whether a `slot` is a proper category, which is yours to get right. Run `python scripts/validate_yaml.py --help` for usage.
+- `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py` — Validates the slots YAML this skill produces against the schema `decide-stack` expects. Run it on your output before handoff with `--stage slots`. It verifies the structure (required fields, types, a non-empty slot list); it does not judge whether a `slot` is a proper category, which is yours to get right. Run `python ${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --help` for usage.

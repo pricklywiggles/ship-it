@@ -28,7 +28,7 @@ stack:
 
 The `stack` list order is the install order; trust it. If no stack YAML is present at `.claude/stack-it/stack.yaml` (and the user gives no other path), ask for it or point the user to `decide-stack` first. This skill installs; it doesn't choose or research tools.
 
-Before doing anything, validate the file with `scripts/validate_yaml.py .claude/stack-it/stack.yaml`. A malformed or unversioned stack file should fail here, before any command runs. Surface any `caveats` from the file to the user up front so they go in aware of known issues, even though those were already discussed in the decide stage.
+Before doing anything, validate the file with `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --stage stack .claude/stack-it/stack.yaml`. A malformed or unversioned stack file should fail here, before any command runs. Surface any `caveats` from the file to the user up front so they go in aware of known issues, even though those were already discussed in the decide stage.
 
 ## Execution rules
 
@@ -49,4 +49,4 @@ Continue until the project is fully set up. Then give a short summary: the tools
 
 ## Bundled resources
 
-- `scripts/validate_yaml.py` — Validates the locked stack file before installation: checks that every entry has a `choice`, an exact `version`, and at least one `install` step, and that the file parses. Run `python scripts/validate_yaml.py --help` for usage. Always run this first; it's cheap insurance against a malformed handoff.
+- `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py` — Validates the locked stack file before installation: checks that every entry has a `choice`, an exact `version`, and at least one `install` step, and that the file parses. Run `python ${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --help` for usage. Always run this first; it's cheap insurance against a malformed handoff.

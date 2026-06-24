@@ -14,6 +14,13 @@
       "prompt": "There's no stack file for this project — can you figure out what it's built with and document it? I want it in CLAUDE.md so agents know the stack, and a tech stack + getting started in the README. The project is at PROJECT_DIR.",
       "expected_output": "No lockfile exists, so the stack is inferred from the codebase (pyproject.toml + imports): Python >=3.12, FastAPI 0.115.0, SQLModel 0.0.22, uvicorn 0.34.0, pytest 8.3.0, Ruff 0.8.0, managed with uv. Discloses that the stack was inferred (and ideally invites correction); does NOT fabricate a stack.yaml. Writes BOTH CLAUDE.md and README inside managed blocks, with real run commands (uv run pytest, ruff check, uvicorn app.main:app).",
       "files": []
+    },
+    {
+      "id": 2,
+      "name": "idempotent-refresh",
+      "prompt": "The stack changed — please re-document it. CLAUDE.md and the README already have the stack section; just bring them up to date. The project is at PROJECT_DIR.",
+      "expected_output": "The project was documented before: CLAUDE.md and README each already contain a <!-- stack-it:stack start/end --> block with STALE content (FastAPI 0.110.0, missing uvicorn/Ruff) and human-written prose OUTSIDE the markers (House rules, Deployment notes, Contributing). Re-running must (a) refresh the managed block to match the current lockfile (FastAPI 0.115.0, SQLModel 0.0.22, uvicorn 0.34.0, pytest 8.3.0, Ruff 0.8.0, Python 3.14.3), (b) preserve the human prose outside the markers verbatim, and (c) keep exactly one marker pair per file (no duplication, no second block appended). This is the skill's headline idempotency property.",
+      "files": []
     }
   ]
 }

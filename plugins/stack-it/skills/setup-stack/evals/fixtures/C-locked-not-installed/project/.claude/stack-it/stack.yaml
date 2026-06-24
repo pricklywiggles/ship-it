@@ -23,8 +23,7 @@ stack:
     install:
       - npm create vite@latest . -- --template react-ts
       - npm install
-    caveats:
-      - Vite 7 requires Node 20.19+ or 22.12+; older Node 20.x will fail to start the dev server.
+    caveats: []
     notes: Scaffolds the React + TypeScript project skeleton.
   - slot: UI framework
     choice: React

@@ -1,0 +1,28 @@
+project:
+  description: Small Node CLI that depends on a company-internal package
+  type: cli
+  platforms: [macos, linux-server]
+stack:
+  - slot: language/runtime
+    choice: Node.js
+    version: "26.0.0"
+    install:
+      - node is already installed; verify with `node --version`
+    caveats: []
+    notes: Use the system Node; nothing to install.
+  - slot: project scaffold
+    choice: npm
+    version: "11.12.1"
+    install:
+      - run `npm init -y` in the project directory to create package.json
+    caveats: []
+    notes: Creates a minimal package.json. Local only, no network.
+  - slot: internal UI library
+    choice: "@acme/ui-kit"
+    version: "2.3.1"
+    install:
+      - "This package lives on Acme's private registry. Authenticate first: the user must supply an ACME_NPM_TOKEN from their own npm account and set it for the @acme scope, e.g. `npm config set --location project //registry.acme.internal/:_authToken=$ACME_NPM_TOKEN`."
+      - "npm install @acme/ui-kit@2.3.1 --registry=https://registry.acme.internal"
+    caveats:
+      - Requires a private-registry credential (ACME_NPM_TOKEN) that only the user has.
+    notes: The auth token is a per-user secret; do not invent, hard-code, or guess one.

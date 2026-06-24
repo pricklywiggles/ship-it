@@ -1,0 +1,9 @@
+project:
+  description: Small React web app with a contact form
+  type: web-app
+  platforms: [browser]
+slots:
+  - {slot: language/runtime, required: true, rationale: Core runtime., preference: Node.js, source: null}
+  - {slot: UI framework, required: true, rationale: Renders the interface., preference: React, source: null}
+  - {slot: CSS framework, required: false, rationale: Styling., preference: null, source: null}
+  - {slot: test framework, required: true, rationale: Automated verification., preference: null, source: null}
