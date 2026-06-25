@@ -1,0 +1,90 @@
+{
+  "skill_name": "identify-stack-slots",
+  "note": "Conversational skill — no installs. It turns a new-project description into a YAML of stack SLOTS (decision categories like 'web framework'), never concrete product picks, and is expected to surface the security/operational slots a naive list misses while omitting slots that don't apply. Run-time interactivity is collapsed: each agent produces a final slots.yaml in one shot, making reasonable best-practice assumptions where the skill would otherwise ask the user.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "public-api-security-completeness",
+      "prompt": "I'm about to start a brand-new public REST API in Go — a todo backend that other apps will call. Before I start picking specific libraries, help me map out all the categories of decisions I need to make for the stack. It persists data and is used by third parties. Give me the final list; assume sensible best practices where you'd otherwise ask me.",
+      "expected_output": "A valid slots.yaml: slots are categories (language/runtime [preference Go], HTTP router/framework, database, authentication, input validation, test framework, logging/observability; optionally rate limiting, containerization). Because it's a public API, authentication AND input-validation slots are present. No slot value is a product name. Required vs optional distinguished.",
+      "files": [],
+      "assertions": [
+        "Output is a valid slots document (passes validate_yaml.py --stage slots)",
+        "Every `slot` value is a decision category, not a product name (e.g. 'web framework', never 'Gin' or 'Postgres')",
+        "Includes the security slots a public API needs — at least authentication AND input validation",
+        "Records the language/runtime slot with preference Go (the named tool captured as metadata, slot value still a category)",
+        "Distinguishes required from optional slots (a `required` boolean that isn't all-true)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "small-cli-minimalism",
+      "prompt": "starting a tiny command-line tool in python that reformats messy csv files — just for me, runs locally. what decisions do i actually need to make to set it up? keep it minimal, i don't want a bunch of stuff i don't need. just give me the list.",
+      "expected_output": "A valid slots.yaml with a MINIMAL set: language/runtime [preference Python], CSV/data handling, CLI/argument parsing, test framework, maybe linter/formatter. Critically does NOT invent web-framework, database, authentication, or deployment slots, which don't apply to a local personal CLI.",
+      "files": [],
+      "assertions": [
+        "Output is a valid slots document (passes validate_yaml.py --stage slots)",
+        "Every `slot` value is a decision category, not a product name",
+        "Stays minimal — does NOT include a web-framework, database, or authentication slot (none apply to a local personal CLI)",
+        "Records the language/runtime slot with preference Python",
+        "Does not pad the list with irrelevant slots to seem thorough"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "webapp-named-tool-and-derived-slots",
+      "prompt": "I'm building a marketing / SaaS dashboard with Next.js and I want a contact form on it. Help me figure out the full set of stack decisions before I commit to libraries — I know I want Next, the rest is open. Give me the final categorized list.",
+      "expected_output": "A valid slots.yaml where the web-framework slot is a CATEGORY with preference Next.js (NOT a slot whose value is 'Next.js'). Because of the contact form, it derives form-handling and email-delivery slots (and likely input-validation / spam-protection). Other slots (CSS/styling, testing, hosting) as appropriate.",
+      "files": [],
+      "assertions": [
+        "Output is a valid slots document (passes validate_yaml.py --stage slots)",
+        "The web-framework slot value is a category (e.g. 'web framework') with preference Next.js — it is NOT a slot named 'Next.js'",
+        "Derives a form-handling slot AND an email/contact-delivery slot from the stated contact-form requirement",
+        "Every other `slot` value is also a category, not a product name",
+        "Distinguishes required from optional slots"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "mac-go-cli-small-business",
+      "prompt": "I'm building a medium-size Go CLI for macOS, for use inside a small business. Map out all the categories of stack decisions I need to make before I pick tools — give me the final list, assume sensible defaults where you'd otherwise ask.",
+      "expected_output": "A valid slots.yaml of categories: language/runtime [preference Go], CLI framework, config management, secrets/credential storage, logging, test framework, build/release, macOS code signing & notarization, dependency/supply-chain scanning; optional packaging/distribution, CI. Derives the macOS distribution concern (signing/notarization); includes config/persistence appropriate to a business tool; NO web-framework or GUI slot. No slot value is a product name.",
+      "files": [],
+      "assertions": [
+        "Output is a valid slots document (passes validate_yaml.py --stage slots)",
+        "Every slot value is a decision category, not a product name",
+        "Records the language/runtime slot with preference Go",
+        "Derives a macOS distribution concern (code signing / notarization, or Homebrew/installer packaging) for shipping a Mac CLI to business users",
+        "Scope-appropriate: includes config and/or data-persistence slots (a medium-size business tool, not a throwaway script) but NO web-framework or GUI slot (it is a CLI)"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "crossplatform-desktop-graphs",
+      "prompt": "I'm building a cross-platform (Windows + macOS) desktop application that consumes structured data and shows high-quality graphs. Help me figure out the full set of stack decisions before I commit to libraries — final categorized list, sensible defaults where you'd otherwise ask.",
+      "expected_output": "A valid slots.yaml of categories: language/runtime, desktop UI/GUI framework (app shell), UI component toolkit, charting/data-visualization, structured-data parsing/ingestion, schema validation, state management, test framework, packaging/installer, code signing & notarization (covering both Windows and macOS); optional persistence/cache, HTTP client, auto-update, crash reporting, logging, CI/CD. Derives the charting + data-ingestion slots from the stated requirements and cross-platform packaging/signing for both OSes. No slot value is a product name.",
+      "files": [],
+      "assertions": [
+        "Output is a valid slots document (passes validate_yaml.py --stage slots)",
+        "Every slot value is a decision category, not a product name",
+        "Includes a desktop UI / GUI framework (app shell) slot",
+        "Includes BOTH a data-visualization/charting slot AND a structured-data ingestion/parsing slot (the two stated requirements)",
+        "Derives cross-platform packaging/distribution for BOTH Windows and macOS (installers and/or code signing on each)"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "high-traffic-url-shortener",
+      "prompt": "I'm building a high-traffic URL shortener. Map out all the categories of stack decisions I need to make before picking specific tools — final list, assume sensible best practices where you'd otherwise ask me.",
+      "expected_output": "A valid slots.yaml of categories: language/runtime, HTTP framework/router, short-code generation strategy, primary datastore, caching layer, redirect/URL validation (open-redirect protection), input validation, rate limiting, authentication, logging/observability, deployment platform, test framework, secrets management; optional malicious-URL scanning, analytics datastore, event/streaming pipeline, CDN/edge, custom-domain/TLS, containerization. The 'high traffic' constraint drives caching + a scalable store; derives abuse/security (rate limiting + malicious-link/open-redirect) and click-analytics. No slot value is a product name.",
+      "files": [],
+      "assertions": [
+        "Output is a valid slots document (passes validate_yaml.py --stage slots)",
+        "Every slot value is a decision category, not a product name",
+        "The 'high traffic' constraint drives a caching layer slot AND a scalable data store (not just a generic 'database')",
+        "Derives abuse/security slots a public shortener needs — at least rate limiting AND malicious-link / open-redirect protection",
+        "Includes a click-analytics/tracking slot (core shortener feature) and an observability slot for a high-traffic service"
+      ]
+    }
+  ]
+}
