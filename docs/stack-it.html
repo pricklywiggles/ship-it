@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>stack-it: the manual</title>
-  <meta name="description" content="stack-it: your stack is the foundation of every project. Go from an empty folder to a fully set-up, version-pinned, security-vetted, documented tech stack, with options and guidance at every step and the pesky install and compatibility issues handled for you. The manual for v0.3.0." />
+  <meta name="description" content="stack-it: your stack is the foundation of every project. Go from an empty folder to a fully set-up, version-pinned, security-vetted, documented tech stack, with options and guidance at every step and the pesky install and compatibility issues handled for you. The manual for v0.4.0." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -90,7 +90,7 @@
         <span class="hidden items-center gap-2 sm:flex">
           <span class="text-disabled">/</span>
           <span class="font-mono text-sm text-body">stack-it</span>
-          <span class="rounded-md border border-border-subtle px-1.5 py-0.5 font-mono text-[10px] text-muted">v0.3.0</span>
+          <span class="rounded-md border border-border-subtle px-1.5 py-0.5 font-mono text-[10px] text-muted">v0.4.0</span>
         </span>
       </a>
       <div class="hidden items-center gap-7 text-[13px] text-body lg:flex">
@@ -279,7 +279,7 @@
         <div class="reveal max-w-[62ch]">
           <div class="kicker text-[11px] text-accent/70">how it works</div>
           <h2 class="mt-3 text-4xl font-bold tracking-tight text-heading md:text-5xl lg:text-[3.2rem]">you make the calls, stack-it does the legwork</h2>
-          <p class="mt-5 leading-relaxed text-body"><span class="font-mono text-zinc-200">stack-it</span> leaves the decisions to you but helps you make them. First it works out the shape of the stack — a series of "slots," placeholders for the tools, frameworks, and languages your project needs. Then it researches each open slot online and brings you the options; you choose, and it handles the pinning, vetting, installing, proving, and documenting in between. The orchestrator <span class="font-mono text-zinc-200">setup-stack</span> runs the whole journey, commits a checkpoint after every stage, keeps a running task list so you can see what's left, and resumes from wherever you already are.</p>
+          <p class="mt-5 leading-relaxed text-body"><span class="font-mono text-zinc-200">stack-it</span> leaves the decisions to you but helps you make them. First it works out the shape of the stack: a series of "slots," placeholders for the tools, frameworks, and languages your project needs. Then it settles the foundation decision first (the language and framework that shape everything else) and researches the remaining slots online in a sensible order, bringing you the options; you choose, and it handles the pinning, vetting, installing, proving, and documenting in between. The orchestrator <span class="font-mono text-zinc-200">setup-stack</span> runs the whole journey, commits a checkpoint after every stage, keeps a running task list so you can see what's left, and resumes from wherever you already are.</p>
         </div>
 
         <!-- the you / stack-it journey -->
@@ -320,7 +320,7 @@
         <!-- compact step legend -->
         <div class="reveal mt-12 divide-y divide-accent/[0.06] border-y border-border-subtle font-mono text-[12.5px]">
           <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">identify-slots</span><span class="text-muted">maps your idea to the decisions it needs, categories, not products</span></div>
-          <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">decide</span><span class="text-muted">researches each slot, you pick, then pins and vets the choice</span></div>
+          <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">decide</span><span class="text-muted">foundation choice first, then researches each slot; you pick, it pins and vets</span></div>
           <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">install</span><span class="text-muted">runs the official steps in order, at the pinned versions</span></div>
           <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">scaffold-and-verify</span><span class="text-muted">builds a real slice and runs it green: build, lint, tests, dev, console</span></div>
           <div class="grid grid-cols-[9.5rem_1fr] gap-4 py-3.5"><span class="text-zinc-200">document</span><span class="text-muted">writes the stack into CLAUDE.md and the README, refreshably</span></div>
@@ -334,7 +334,7 @@
         <div class="reveal lg:sticky lg:top-28 lg:self-start">
           <div class="kicker text-[11px] text-accent/70">options, not guesswork</div>
           <h2 class="mt-3 text-4xl font-bold tracking-tight text-heading md:text-5xl lg:text-[3.2rem]">it brings you a short list, you decide</h2>
-          <p class="mt-5 max-w-[50ch] leading-relaxed text-body">stack-it never picks behind your back. For each open slot it researches the field — versions, maintenance, compatibility, advisories — and surfaces two to four current options with the tradeoff that actually matters. You choose; then it pulls the exact install steps from the tool's official docs for that exact version, pins it, and re-checks for advisories. Hard preferences are honored from the start, and the heavy research runs on a leaner model to keep it fast and cheap.</p>
+          <p class="mt-5 max-w-[50ch] leading-relaxed text-body">stack-it never picks behind your back. It settles the keystone first (the language-and-framework choice that shapes every other slot, offered as a coupled pair so picking one never silently corners the other), then works through the rest in a sensible order. For each open slot it researches the field (versions, maintenance, compatibility, advisories) and surfaces two to four current options with the tradeoff that actually matters. You choose; then it pulls the exact install steps from the tool's official docs for that exact version, pins it, and re-checks for advisories. Hard preferences are honored from the start, and the heavy research runs on a leaner model to keep it fast and cheap.</p>
           <p class="mt-4 max-w-[50ch] text-sm leading-relaxed text-muted">It's the difference between a tool that decides for you and one that helps you decide well.</p>
         </div>
 
@@ -536,7 +536,7 @@ claude plugin install stack-it@fractally-claude-marketplace</pre>
             <svg viewBox="0 0 24 24" class="h-4 w-4 text-accent" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z" stroke-linejoin="round"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>
           <span class="font-mono text-sm text-zinc-300">stack-it</span>
-          <span class="rounded-md border border-border-subtle px-1.5 py-0.5 font-mono text-[10px] text-muted">v0.3.0</span>
+          <span class="rounded-md border border-border-subtle px-1.5 py-0.5 font-mono text-[10px] text-muted">v0.4.0</span>
         </div>
         <div class="flex items-center gap-6 font-mono text-xs text-muted">
           <a href="index.html" class="hover:text-heading">marketplace</a>

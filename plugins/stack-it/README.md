@@ -1,6 +1,6 @@
 # stack-it
 
-Take a project from nothing to a working, verified, documented tech stack — a guided, resume-aware orchestrator plus five standalone, individually callable stage skills.
+Take a project from nothing to a working, verified, documented tech stack: a guided, resume-aware orchestrator plus five standalone, individually callable stage skills.
 
 ## The pipeline
 
@@ -25,8 +25,8 @@ Each stage is usable on its own; `setup-stack` is for taking the whole journey i
 
 The stages share state through two files under **`.claude/stack-it/`** in the project:
 
-- `slots.yaml` — written by `identify-stack-slots`, read by `decide-stack`.
-- `stack.yaml` — written by `decide-stack`; read by `install-stack`, `scaffold-and-verify`, and `document-stack`.
+- `slots.yaml`: written by `identify-stack-slots`, read by `decide-stack`.
+- `stack.yaml`: written by `decide-stack`; read by `install-stack`, `scaffold-and-verify`, and `document-stack`.
 
 `stack.yaml` is the single source of truth. `install-stack` and `scaffold-and-verify` **update it in place** to match reality (a nearest-patch install, a pin-drift fix). What they will *not* do is silently change *which tool* fills a slot: a genuine **stack fault** (a chosen tool that can't work) is escalated back to `decide-stack` and the user, so the lockfile never drifts from the user's decisions.
 
@@ -57,13 +57,13 @@ project: { description, type, platforms }   # as above
 stack:                                       # list order IS the install order
   - slot: <non-empty string>
     choice: <non-empty string>               # the chosen tool
-    version: "<exact pinned version, quoted>"  # quote it — `3.10` unquoted parses as 3.1
+    version: "<exact pinned version, quoted>"  # quote it: `3.10` unquoted parses as 3.1
     install: ["<non-empty step>", ...]        # non-empty list of non-empty steps, verbatim from the version's official docs
     caveats: [<list>]                         # [] for none
     notes: <string or null>                   # e.g. the source doc URL the install steps came from (provenance)
 ```
 
-The validator checks **shape, not meaning** — it won't catch a `slot` that's accidentally a product name, or a wrong-but-valid version. Those stay the skills' responsibility.
+The validator checks **shape, not meaning**: it won't catch a `slot` that's accidentally a product name, or a wrong-but-valid version. Those stay the skills' responsibility.
 
 ## Developing
 

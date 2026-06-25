@@ -23,14 +23,14 @@ Every skill auto-activates when Claude judges it relevant, or you can invoke one
 
 | Skill | Role |
 |---|---|
-| `ship-issues` | **Orchestrator.** Ship a batch of work-units (tracker issues or your current local changes) concurrently — plan, implement, clean comments, review and address, then open a PR for each — keeping living docs in sync. |
+| `ship-issues` | **Orchestrator.** Ship a batch of work-units (tracker issues or your current local changes) concurrently: plan, implement, clean comments, review and address, then open a PR for each, keeping living docs in sync. |
 | `init` | Configure ship-it for a project: detect the package manager, verify command, CI, issue tracker, docs, and reviewers; write `ship-it.config`. Run once per project before the orchestrator. |
 | `plan-one-issue` | Produce a comprehensive, reviewable implementation plan for a single work-unit before any code is written. |
 | `fix-one-issue` | Implement a single work-unit end to end in its branch: explore, make the smallest correct change, verify, commit. |
 | `review-and-address` | Run the project's configured reviewers in parallel over a branch or diff, merge their findings, and apply the warranted ones. |
 | `comment-cleanup` | Audit code comments against the "explain non-obvious *why*, never narrate *what*" standard and propose concrete fixes. |
 | `open-pr` | Push a finished branch and open its pull request with a complete, QA-ready body (summary, tracker link, verification checklist). |
-| `ci-fix` | Watch a pull request's CI to completion and fix any failures in its branch — bounded and cause-only. |
+| `ci-fix` | Watch a pull request's CI to completion and fix any failures in its branch, bounded and cause-only. |
 
 Each stage is usable on its own; `ship-issues` is for taking a whole batch through the flow in one pass. The stage skills also compose: the orchestrator chains them per work-unit.
 
@@ -38,9 +38,9 @@ Each stage is usable on its own; `ship-issues` is for taking a whole batch throu
 
 ship-it is three layers (see [CONTRACTS.md](CONTRACTS.md) for the full design spec):
 
-1. **Orchestrator** — generic and project-agnostic. It owns lane grouping, the concurrent Workflow fan-out, the worktree lifecycle, and the post-PR CI watchers. It contains no project specifics.
-2. **Stage skills** — reusable units of work. Each operates on one **work-unit** (a tracker issue, or ad-hoc local work) and is individually callable, both from an orchestrator's parallel workers and by you on its own.
-3. **Per-project config** (`ship-it.config`) — the values, command strings, and adapter references that adapt the generic engine to your project. Produced by `init` and validated by a bundled JSON-schema check.
+1. **Orchestrator:** generic and project-agnostic. It owns lane grouping, the concurrent Workflow fan-out, the worktree lifecycle, and the post-PR CI watchers. It contains no project specifics.
+2. **Stage skills:** reusable units of work. Each operates on one **work-unit** (a tracker issue, or ad-hoc local work) and is individually callable, both from an orchestrator's parallel workers and by you on its own.
+3. **Per-project config** (`ship-it.config`): the values, command strings, and adapter references that adapt the generic engine to your project. Produced by `init` and validated by a bundled JSON-schema check.
 
 All human interaction is front-loaded into `init` and the plan checkpoint, so the workers run non-interactively and parallelize. Reviewers and doc jobs are parallel fan-outs over their configured lists.
 
@@ -50,8 +50,8 @@ All human interaction is front-loaded into `init` and the plan checkpoint, so th
 
 ## Layout
 
-- `skills/` — the eight individually callable skills
-- `scripts/` — the engine's shell helpers (config loader and validator, worktree setup/cleanup, CI and merge watchers, doc-job reconcilers)
-- `CONTRACTS.md` — the design spec: the stable interfaces and the `ship-it.config` shape
-- `ship-it.config.example.jsonc` — a worked example config
-- `.claude-plugin/plugin.json` — the plugin manifest
+- `skills/`: the eight individually callable skills
+- `scripts/`: the engine's shell helpers (config loader and validator, worktree setup/cleanup, CI and merge watchers, doc-job reconcilers)
+- `CONTRACTS.md`: the design spec, the stable interfaces and the `ship-it.config` shape
+- `ship-it.config.example.jsonc`: a worked example config
+- `.claude-plugin/plugin.json`: the plugin manifest

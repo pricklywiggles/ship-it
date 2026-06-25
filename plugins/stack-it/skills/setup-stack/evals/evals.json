@@ -27,7 +27,7 @@
       "id": 3,
       "name": "ambiguous-partial-install",
       "prompt": "Set up the whole tech stack for the project at PROJECT_DIR. (Dry run: report which stage you would START at and why; do not run any stage, install, or command.)",
-      "expected_output": "The signature fail-safe (SKILL.md Step 1): stack.yaml exists, a package.json is present, and a node_modules/ directory exists but resolves nothing (only an empty .package-lock.json) — a false 'installed' signal. The skill must NOT trust the bare node_modules and skip ahead; it should treat the state as ambiguous and CONFIRM the entry stage with the user before proceeding (most likely install-stack, since nothing is actually resolved).",
+      "expected_output": "The signature fail-safe (SKILL.md Step 1): stack.yaml exists, a package.json is present, and a node_modules/ directory exists but resolves nothing (only an empty .package-lock.json), a false 'installed' signal. The skill must NOT trust the bare node_modules and skip ahead; it should treat the state as ambiguous and CONFIRM the entry stage with the user before proceeding (most likely install-stack, since nothing is actually resolved).",
       "files": []
     }
   ]

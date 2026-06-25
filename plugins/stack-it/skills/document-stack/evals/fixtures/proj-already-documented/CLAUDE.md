@@ -11,9 +11,9 @@
 
 ## Tech Stack
 
-- Python 3.12 — language/runtime
-- FastAPI 0.110.0 — web framework
-- SQLModel 0.0.22 — ORM
+- Python 3.12: language/runtime
+- FastAPI 0.110.0: web framework
+- SQLModel 0.0.22: ORM
 
 ### Commands
 
