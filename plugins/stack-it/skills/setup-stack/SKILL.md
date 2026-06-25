@@ -29,17 +29,17 @@ Before the first stage, get two things in place that you maintain for the rest o
 
 ## The running task list
 
-Maintain one list for the whole run and **render it to the user between every stage**, with clear done / current / remaining markers, so they always know how much is left and never have to wonder "are we done yet?". Keep it concise — group by stage and show counts where a stage has many items. Update it whenever the work changes (slots added or deferred, tools chosen, a stack fault sending a slot back). Derive it from the `slots.yaml`/`stack.yaml` entries plus the fixed stage sequence — don't invent a separate tracking file.
+Maintain one list for the whole run and **render it to the user between every stage**, with clear done / current / remaining markers, so they always know how much is left and never have to wonder "are we done yet?". Keep it concise — group by stage and show counts where a stage has many items. **Give each stage a short one-line purpose** so the user understands what it does and why it's there — especially the first time you show the list, when the pipeline is still unfamiliar. Update it whenever the work changes (slots added or deferred, tools chosen, a stack fault sending a slot back). Derive it from the `slots.yaml`/`stack.yaml` entries plus the fixed stage sequence — don't invent a separate tracking file.
 
 Example shape (adapt freely):
 
 ```
 stack-it progress
-  [x] identify slots        (11 slots: 9 required, 2 optional)
-  [>] decide stack          (4 / 11 chosen — contact-email, MDX, testing, component-sharing open)
-  [ ] install
-  [ ] scaffold & verify
-  [ ] document
+  [x] 1. identify slots     — agent researches stack shape for your approval          (15 slots: 13 required, 2 optional)
+  [>] 2. decide stack       — agent swarm researches tooling choices, you pick         (4 / 15 chosen)
+  [ ] 3. install            — agent swarm pulls up-to-date setup steps, asks only when needed
+  [ ] 4. scaffold & verify  — build a small example and verify the tooling works / fix
+  [ ] 5. document           — document the finalized stack to CLAUDE.md and README
 ```
 
 ## The handoff contract
