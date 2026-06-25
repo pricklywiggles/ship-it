@@ -32,43 +32,54 @@ Before researching anything, ask the user whether they have hard preferences for
 
 Merge these answers with any `preference` values already in the input YAML. A preference from either source means that slot is decided unless the user later changes their mind.
 
-## Step 2: Resolve each open slot
+## How the research fans out, and on which model
 
-Carry over every slot that already has a preference. Don't research alternatives for a decided slot unless the user asks.
+This skill researches in **two fan-out passes** — Phase 1 before the user chooses (options, versions, risk), Phase 2 after (exact install steps for what they picked). Both run as concurrent subagents, and two rules apply to every research subagent you launch:
 
-For each slot with no preference, research options online and present a short list for the user to choose from. **These research tasks are independent across slots, so run them concurrently** rather than one slot at a time. Gather all the option research in parallel, then walk the user through the slots.
+- **Run them on the cheaper model.** Launch the research subagents with the Agent tool's `model` set to `sonnet` (`claude-sonnet-4-6`). The work is retrieval and structured summarization — fetching versions, reading docs, checking advisories — which Sonnet does well at roughly 40% lower cost than the session model. Keep the *judgment* on the session model you're running on: weighing the options, making the supply-chain risk call, and choosing the final pin are yours, not the subagents'. The subagents gather facts; you decide. (This mirrors how Claude Code uses cheaper subagents for exploration while the main loop stays on the stronger model.)
+- **They return facts, not decisions.** A research subagent brings back verifiable data — versions, dates, advisory IDs, compatibility notes, doc-sourced steps — for you to synthesize. Don't ask a subagent to pick the winner.
 
-For each open slot:
-1. Find the options that are most used, most trusted, and most modern. These are different axes, and a good shortlist usually spans them (a battle-tested default, a modern challenger).
-2. Prefer authoritative signals: official ecosystem recommendations, real usage/download statistics, maintenance status, and security track record. Discount SEO listicles and unmaintained projects.
-3. Present 2–4 options with a one- to two-line blurb each: what it is and its main tradeoff.
-4. Let the user pick. Answer their questions. Present the landscape and let them choose; don't push your own favorite.
+## Step 2: Phase 1 research — options, versions, and risk (so the user can choose)
 
-Record each decision.
+Carry over every slot that already has a preference; don't research alternatives for a decided slot unless the user asks.
 
-## Step 3: Verify every chosen tool
+For each slot with no preference, fan out one research subagent per slot (concurrently, per the rules above) to bring back the landscape — **not** install steps yet, just what's needed to choose. For each slot, the subagent returns 2–4 viable options, and for each option:
 
-Once every slot has a concrete choice, verify each one. **The three checks below are independent per tool, so verify all tools concurrently** instead of serially; this is the slowest part of the skill and parallelizing it matters.
+1. Whether it's a most-used / most-trusted / most-modern candidate (different axes; a good shortlist spans them — a battle-tested default and a modern challenger).
+2. The latest stable version, maintenance status, official/ecosystem recommendation, and a real usage signal (downloads, stars-with-activity). Prefer authoritative sources; discount SEO listicles and unmaintained projects.
+3. Compatibility with the rest of the stack as it's being locked (framework major, runtime, the other chosen tools).
+4. Known CVEs / security advisories, and — importantly — **the latest version's publish date**.
 
-For each chosen tool:
+**Treat the supply-chain cooldown as a decision input, not an install-time surprise.** If a candidate's newest version was published inside the recent-release window (roughly the last two weeks), surface that *now* and lean toward recommending the nearest already-vetted stable release, so the user picks with the window in mind. Discovering this only at install time forces avoidable version drift later.
 
-1. **Latest official version and install instructions.** Get these from the official source, the project's own repository, site, or registry page, never a third-party tutorial. Record the exact latest stable version and the official install command(s).
-2. **Known issues and vulnerabilities.** Search for CVEs, security advisories, and significant open issues affecting the tool or the version. Check the official advisory channel where one exists (GitHub Security Advisories, the language's advisory database, etc.).
-3. **Supply-chain threat check for fresh releases.** If the specific version you intend to install was *published within roughly the last two weeks*, do an additional search for recent package hijacking, malicious releases, compromised maintainer accounts, or registry-level attacks affecting this package or its package manager/registry. A freshly published version is the window in which supply-chain compromises surface, so a recent publish date is the trigger regardless of how old the project itself is. The classic pattern is a malicious version pushed from a compromised maintainer account that auto-installs on anyone using loose version ranges, often live for only hours before removal, so the freshly-published window is exactly when caution pays off. When a recent release is unvetted, the safe default is to recommend a slightly older, already-vetted stable version and pin it, or to apply a quarantine window so brand-new releases aren't installed until the community has had time to vet them (for npm, `npm config set min-release-age` delays installs of new versions; other ecosystems have equivalents). Record what you found and what you recommend in the slot's caveats.
+Then walk the user through the open slots: present the 2–4 options each with a one- to two-line blurb (what it is, its main tradeoff), answer questions, and let them pick. Present the landscape; don't push your favorite. Record each decision.
 
-   **Worked example.** Suppose a slot's chosen tool has latest stable `4.5.0`, published 3 days ago. Because that's inside the two-week window, you run the extra search. You find a security advisory reporting that a malicious `4.5.0` was briefly published from a hijacked maintainer account and later removed, with the clean prior release being `4.4.2`. The right move is to flag this prominently to the user, recommend pinning `4.4.2` (or waiting out a quarantine window before taking `4.5.x`), and record a caveat like: "4.5.0 published 3 days ago; advisory X reported a hijacked release in this window. Pinned 4.4.2 (last release before the incident) pending community vetting." If instead the search turns up nothing concerning, note that you checked and found no active threat, so the user knows the fresh version was vetted rather than skipped.
+## Step 3: Phase 2 research — exact install and setup from official docs (for what they chose)
+
+Once every slot has a concrete choice, fan out a **second** swarm — one subagent per chosen tool, concurrently, on Sonnet per the rules above. This is the slowest part of the skill and parallelizing it matters. Each subagent has strong, specific instructions: fetch the **exact install, setup, and configuration steps for the exact chosen version** from that tool's **official documentation** (its own docs site, repository, or registry page), never from memory or a third-party tutorial. Setup procedures change between versions — a major release can rewrite the entire config story — so the steps must come from the docs *for the pinned version*, not from general knowledge.
+
+Each Phase-2 subagent returns:
+
+1. **The verbatim install command(s)** for that version, in the project's package manager.
+2. **Any required config files or snippets** the docs specify for that version (a plugin registration, a config-file format, an init command, …).
+3. **A supply-chain check at the exact version.** Confirm whether the version is inside the fresh-release window — *published within roughly the last two weeks* — and whether any advisory affects it. A freshly published version is the window in which supply-chain compromises surface (the classic pattern: a malicious version pushed from a hijacked maintainer account that auto-installs on loose version ranges, live for only hours before removal), so a recent publish date is the trigger regardless of how old the project is. When a recent release is unvetted, the safe default is to recommend a slightly older, already-vetted stable version and pin it, or to apply a quarantine window (for npm, `npm config set min-release-age` delays installs of new versions; other ecosystems have equivalents). Record findings in the slot's caveats.
+4. **The source URL** — the official doc page the steps came from, so install-stack and the user can re-verify against it.
+
+   **Worked example.** Suppose a chosen tool's latest stable is `4.5.0`, published 3 days ago. Because that's inside the window, the subagent runs the extra search and finds an advisory reporting a malicious `4.5.0` briefly published from a hijacked maintainer account and later removed, with the clean prior release being `4.4.2`. The right move is to flag this prominently, pin `4.4.2` (or wait out a quarantine window before `4.5.x`), and record a caveat like: "4.5.0 published 3 days ago; advisory X reported a hijacked release in this window. Pinned 4.4.2 (last release before the incident) pending community vetting." If the search turns up nothing, note that you checked and found no active threat, so the user knows the fresh version was vetted rather than skipped.
+
+You — on the session model — synthesize these results into the locked YAML: the `install:` steps are the verbatim, version-specific commands the subagents fetched from the docs (not composed from memory), the caveats carry the supply-chain findings, and each entry's `notes` records the source doc URL.
 
 ## Step 4: Present findings and confirm
 
 Present the consolidated stack: each slot, its chosen tool, the version, and every caveat found. Call out all vulnerabilities, known issues, and supply-chain concerns explicitly. The whole point of the research is to surface these, so don't bury them.
 
-Have a conversation to confirm or change choices in light of the findings. A serious caveat may send a slot back to Step 2 for a different pick. Loop until the user is satisfied.
+Have a conversation to confirm or change choices in light of the findings. A serious caveat may send a slot back to Phase 1 (Step 2) for a different pick — and a changed pick means re-running Phase 2 for that one tool. Loop until the user is satisfied.
 
 ## Step 5: Emit the locked YAML
 
 Once approved, write the final YAML. **Order the `stack` list in the sequence the tools should be installed**, since install order matters: foundational tools (language/runtime, package manager) first, then things installed through them, then plugins/extensions that depend on a framework. The list order *is* the install order, so get it right here; the install stage trusts it.
 
-Pin the exact versions that were researched and approved. The install instructions called for the latest stable, so these should be recent; pinning them keeps the install reproducible and matching what was vetted.
+Pin the exact versions that were researched and approved — the cooldown-aware choices from Phase 1, not blindly the newest release. The `install:` steps are the verbatim, version-specific commands Phase 2 fetched from each tool's official docs, and each entry's `notes` carries the source doc URL so install-stack and the user can re-verify. Pinning keeps the install reproducible and matching exactly what was vetted.
 
 ```yaml
 project:
@@ -80,10 +91,10 @@ stack:
     choice: <chosen tool>
     version: <exact pinned version>
     install:
-      - <official install command or step>
+      - <verbatim command/step from the version's official docs (Phase 2)>
     caveats:
       - <vulnerability / known issue / supply-chain note>   # empty list if none
-    notes: <anything the install stage needs to know, or null>
+    notes: <anything the install stage needs to know; include the source doc URL for provenance, or null>
 ```
 
 Save it to **`.claude/stack-it/stack.yaml`** in the project (creating `.claude/stack-it/` if needed — the pipeline's home for its generated files), then validate with `${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py --stage stack .claude/stack-it/stack.yaml` so a schema mistake is caught now, not in the install stage. This file is the handoff to `install-stack`, and the later stages read and update it in place, so it stays the single source of truth for the stack. If the user ever sends you back here to re-pick a slot (because `install-stack` or `scaffold-and-verify` hit a tool that can't work), edit this same file with the new choice rather than starting a fresh one.
